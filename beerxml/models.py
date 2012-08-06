@@ -84,11 +84,12 @@ class BeerXMLNode(dict):
                 raise BeerXMLError(e)
     
     def __repr__(self):
+        # Shamelessly copied from django
         try:
             u = unicode(self.__name__)
         except (UnicodeEncodeError, UnicodeDecodeError):
-            u = '[Bad Unicode data]'
-        return smart_str(u'<%s: %s>' % (self.__class__.__name__, u))
+            u = "[Bad Unicode data]"
+        return smart_str(u"<%s: %s>" % (self.__class__.__name__, u))
     
     def _get_node_model(self):
         """
