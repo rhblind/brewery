@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from error import BeerXMLValidationError
+from error import BeerXMLError, BeerXMLValidationError
 
 from django.db.models.loading import get_model
 from django.utils.encoding import smart_str
@@ -81,7 +81,7 @@ class BeerXMLNode(dict):
             except ValidationError, e:
                 raise BeerXMLValidationError(e)
             except Exception, e:
-                raise e
+                raise BeerXMLError(e)
     
     def __repr__(self):
         try:
