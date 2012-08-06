@@ -17,7 +17,7 @@
 #  - Text           : CharField or TextField dependent on situation
 #  - Integer        : IntegerField (may include negative values, 
 #                     except version which is PositiveSmallIntegerField)
-#  - Percentage     : DecimalField (max digits: 5, decimal places: 2 = max val 100.00)
+#  - Percentage     : DecimalField (max digits: 5, decimal places: 2 = max val 999.99)
 #  - Weight         : DecimalField (max_digits: 8, decimal_places: 4 = max val 9999.9999)
 #  - Temperature    : DecimalField (max_digits: 8, decimal_places: 4 = max val 9999.9999)
 #  - List           : CharField with choices (key=numeric index, value=display value)
