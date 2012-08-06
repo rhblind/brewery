@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from error import BeerXMLValidationError
+
 from django.db.models.loading import get_model
 from django.utils.encoding import smart_str
 from django.db.models.fields import FieldDoesNotExist
-from apps.brewery.beerxml.error import BeerXMLValidationError
 from django.db.models.fields.related import ManyToOneRel, ManyToManyRel
 from django.core.exceptions import ValidationError
 
