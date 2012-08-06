@@ -9,7 +9,8 @@ from django.test import TestCase
 from beerxml import parser
 from beerxml.models import BeerXMLNode
 
-EXAMPLES_DIR = os.path.join("docs", "beerxml-examples")
+EXAMPLES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 
+                            "docs", "beerxml-examples")
 FILES = ("equipment.xml", "grain.xml", "hops.xml", "mash.xml",
          "misc.xml", "recipes.xml", "style.xml", "water.xml",
          "yeast.xml")
