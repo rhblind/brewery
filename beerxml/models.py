@@ -192,3 +192,5 @@ class BeerXMLNode(dict):
             save_node_relations(self, obj, inherit=inherit)
         except Exception, e:
             raise BeerXMLError(e)
+        
+        return obj, created
