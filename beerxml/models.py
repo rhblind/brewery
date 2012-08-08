@@ -102,7 +102,7 @@ class BeerXMLNode(dict):
         return model
     _model = property(_get_node_model)
     
-    def save(self, force_insert=False, force_update=False, using=None):
+    def get_or_create(self, **kwargs):
         """
         Save this node and all dependent
         nodes to the database
@@ -131,9 +131,13 @@ class BeerXMLNode(dict):
                                     or any(k in x.keys() for x in iter_field_type(node, ManyToManyRel)))])
             return lookup
         
-        def save_node_relations(node, obj, force_insert=None, force_update=None):
+        def save_node_relations(node, obj, **kwargs):
             """
             node = BeerXMLNode(), obj = saved Model() instance.
+            kwargs take a special dictionary called 'inherit',
+            which can be used to set same attribute on all nodes.
+            This is mainly used to set user attribute to same user
+            when traversing the tree.
             
             Traverse the current node, looking for many-to-one and 
             many-to-many relations. If found, each relation is instantiated 
@@ -152,37 +156,39 @@ class BeerXMLNode(dict):
             else:
                 raise BeerXMLError("%s must be a Model instance." % obj)
             
+            inherit = kwargs.pop("inherit", {})
             try:
+                # TODO: use get_or_create()
                 # Add many-to-one (ForeignKey) relations
                 for m2one in iter_field_type(node, ManyToOneRel):
                     for field_name, n in m2one.iteritems():
                         lookup = get_clean_lookup(n)
-                        rel_obj = n._model(**lookup)
-                        rel_obj.save(force_insert=force_insert, force_update=force_update)
+                        lookup.update(inherit)
+                        rel_obj, created = n._model.objects.get_or_create(**lookup)
                         setattr(obj, field_name, rel_obj)
-                        save_node_relations(n, rel_obj, force_insert=force_insert, 
-                                            force_update=force_update)
+                        save_node_relations(n, rel_obj)
                 
                 # Add many-to-many relations
                 for m2m in iter_field_type(node, ManyToManyRel):
                     for field_name, n_list in m2m.iteritems():
                         for n in n_list:
                             lookup = get_clean_lookup(n)
-                            rel_obj = n._model(**lookup)
-                            rel_obj.save(force_insert=force_insert, force_update=force_update)
+                            lookup.update(inherit)
+                            rel_obj, created = n._model.objects.get_or_create(**lookup)
                             # Ugly hack to add many-to-many relations
                             # on arbitrary fields
-                            x = obj.__getattribute__(field_name)
-                            x.add(rel_obj)
-                            save_node_relations(n, rel_obj, force_insert=force_insert, 
-                                                force_update=force_update)
+                            m2m_field = obj.__getattribute__(field_name)
+                            m2m_field.add(rel_obj)
+                            save_node_relations(n, rel_obj)
             except Exception, e:
                 raise BeerXMLError(e)
             
         try:
             lookup = get_clean_lookup(self)
-            obj = self._model(**lookup)
-            obj.save(force_insert=force_insert, force_update=force_update)
-            save_node_relations(self, obj)
+            # update lookup with special inherit dict
+            inherit = kwargs.pop("inherit", {})
+            lookup.update(inherit)
+            obj, created = self._model.objects.get_or_create(**lookup)
+            save_node_relations(self, obj, inherit=inherit)
         except Exception, e:
             raise BeerXMLError(e)
