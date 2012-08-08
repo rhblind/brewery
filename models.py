@@ -58,6 +58,7 @@
 #===============================================================================
 
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 
 class Equipment(models.Model):
@@ -161,6 +162,10 @@ class Equipment(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="equipment_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="equipment_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -266,6 +271,10 @@ class Fermentable(models.Model):
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
     is_mashed = models.NullBooleanField(_("is mashed"), default=False, blank=True, null=True)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="fermentable_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="fermentable_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -361,6 +370,10 @@ class Hop(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="hop_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="hop_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -446,6 +459,10 @@ class MashStep(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="mashstep_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="mashstep_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
 
@@ -516,6 +533,10 @@ class MashProfile(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="mashprofile_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="mashprofile_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -581,6 +602,10 @@ class Misc(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="misc_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="misc_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -692,6 +717,10 @@ class Yeast(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="yeast_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="yeast_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -746,6 +775,10 @@ class Water(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="water_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="water_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -865,6 +898,10 @@ class Style(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="style_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="style_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -1058,6 +1095,10 @@ class Recipe(models.Model):
     
     # Other nice to have fields
     slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="recipe_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="recipe_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
@@ -1080,9 +1121,6 @@ class RecipeOption(models.Model):
     """
     Each recipe can have a different set of options.
     """
-    
-    class Meta:
-        verbose_name_plural = "Recipe options"
     
     # Units
     WEIGHT = (
@@ -1141,6 +1179,10 @@ class RecipeOption(models.Model):
             for calculating the color for this recipe""")
     ibu_formula = models.PositiveSmallIntegerField(_("ibu formula"), choices=IBU_FORMULA, 
             default=0, help_text="IBU formula to use for calculating IBU for this recipe")
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="recipeoption_registered_by", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="recipeoption_modified_by", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), auto_now=True)
     
