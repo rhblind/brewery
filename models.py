@@ -902,8 +902,8 @@ class Recipe(models.Model):
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
                                                help_text="XML version")
     recipe_type = models.CharField(_("type"), max_length=12, choices=TYPE)
-    style = models.ForeignKey(Style, help_text="""The style of the beer this 
-            recipe is associated with.""")
+    style = models.ForeignKey(Style, null=True, help_text="""The style of the 
+            beer this recipe is associated with.""")
     equipment = models.ForeignKey(Equipment, blank=True, null=True, 
             help_text="""An equipment record is optional. If included the 
             Batch size and Boil size in the equipment record must match 
