@@ -58,10 +58,10 @@
 #===============================================================================
 
 from django.db import models
+from django.db.models import signals
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.dispatch.dispatcher import receiver
-from django.db.models import signals
 
 
 #
@@ -90,7 +90,7 @@ class Equipment(models.Model):
 
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1,
-                                               help_text="XML version")
+                               editable=False, help_text="XML version")
     boil_size = models.DecimalField(_("boil size"), max_digits=8, 
                 decimal_places=4, help_text="""The pre-boil volume used 
                 in this particular instance for this equipment setup.
@@ -188,8 +188,8 @@ class Equipment(models.Model):
             related_name="equipment_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="equipment_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     def __unicode__(self):
         return u"%s" % self.name
@@ -220,7 +220,7 @@ class Fermentable(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                               editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     ferm_type = models.CharField(_("fermentable type"), max_length=12, choices=TYPE)
     amount = models.DecimalField(_("amount"), max_digits=8, decimal_places=4,
@@ -297,8 +297,8 @@ class Fermentable(models.Model):
             related_name="fermentable_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="fermentable_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     # NOTE: See beginning of file
     _beerxml_attrs = {
@@ -341,7 +341,7 @@ class Hop(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                               editable=False, help_text="XML version")
     alpha = models.DecimalField(_("alpha percentage"), max_digits=5, 
             decimal_places=2, help_text="""Percent alpha of hops 
             - for example "5.5" represents 5.5% alpha""")
@@ -396,8 +396,8 @@ class Hop(models.Model):
             related_name="hop_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="hop_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     # NOTE: See beginning of file
     _beerxml_attrs = {
@@ -429,7 +429,7 @@ class MashStep(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                               editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     mash_type = models.CharField(_("type"), max_length=12, choices=TYPE, 
             help_text="""May be “Infusion”, “Temperature” or “Decoction” depending 
@@ -485,8 +485,8 @@ class MashStep(models.Model):
             related_name="mashstep_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="mashstep_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
 
     # NOTE: See beginning of file
     _beerxml_attrs = {
@@ -513,7 +513,7 @@ class MashProfile(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100, blank=True, null=True)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                                       editable=False, help_text="XML version")
     grain_temp = models.DecimalField(_("grain temperature"), max_digits=8, 
             decimal_places=4, help_text="""The temperature of the grain before 
             adding it to the mash in degrees Celsius.""")
@@ -559,8 +559,8 @@ class MashProfile(models.Model):
             related_name="mashprofile_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="mashprofile_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     def __unicode__(self):
         return u"%s" % self.name
@@ -591,7 +591,7 @@ class Misc(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                                   editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     misc_type = models.CharField(_("hop type"), max_length=12, choices=TYPE, default=4)
     use = models.CharField(_("hop type"), max_length=12, choices=USE, default=2)
@@ -628,8 +628,8 @@ class Misc(models.Model):
             related_name="misc_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="misc_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     # NOTE: See beginning of file
     _beerxml_attrs = {
@@ -676,7 +676,7 @@ class Yeast(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                                       editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     yiest_type = models.CharField(_("yeast type"), max_length=12, choices=TYPE, 
                                   default=1)
@@ -743,8 +743,8 @@ class Yeast(models.Model):
             related_name="yeast_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="yeast_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     # NOTE: See beginning of file
     _beerxml_attrs = {
@@ -770,7 +770,7 @@ class Water(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                                       editable=False, help_text="XML version")
     amount = models.DecimalField(_("amount"), max_digits=8, decimal_places=4,
             help_text="Volume of water to use in a recipe in liters.")
     calcium = models.DecimalField(_("calcium"), max_digits=8, decimal_places=4,
@@ -801,8 +801,8 @@ class Water(models.Model):
             related_name="water_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="water_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     def __unicode__(self):
         return u"%s" % self.name
@@ -825,7 +825,7 @@ class Style(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                                   editable=False, help_text="XML version")
     category = models.CharField(_("category"), max_length=100, 
             help_text="""Category that this style belongs to – usually 
             associated with a group of styles such as  “English Ales” or 
@@ -924,8 +924,8 @@ class Style(models.Model):
             related_name="style_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="style_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     # NOTE: See beginning of file
     _beerxml_attrs = {
@@ -959,7 +959,7 @@ class Recipe(models.Model):
     # BeerXML fields
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                               help_text="XML version")
+                                   editable=False, help_text="XML version")
     recipe_type = models.CharField(_("type"), max_length=12, choices=TYPE)
     style = models.ForeignKey(Style, null=True, help_text="""The style of the 
             beer this recipe is associated with.""")
@@ -1121,8 +1121,8 @@ class Recipe(models.Model):
             related_name="recipe_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="recipe_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     # NOTE: See beginning of file
     _beerxml_attrs = {
@@ -1205,8 +1205,8 @@ class RecipeOption(models.Model):
             related_name="recipeoption_registered_by", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
             related_name="recipeoption_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), auto_now=True)
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     def __unicode__(self):
         return u"%s Recipe options" % self.recipe.name
