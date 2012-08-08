@@ -60,6 +60,28 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+from django.dispatch.dispatcher import receiver
+from django.db.models import signals
+
+
+#
+# Signals
+#
+
+@receiver(signals.pre_save)
+def clean_model_callback(sender, instance, **kwargs):
+    """
+    Brewery models depend on model cleaning to
+    translate some BeerXML values to brewery compatible
+    values. This callback will call clean on every
+    model before saving.
+    """
+    instance.clean()
+
+
+#
+# Models
+#
 
 class Equipment(models.Model):
     """
@@ -284,10 +306,10 @@ class Fermentable(models.Model):
         "yield": "ferm_yield"
     }
     
-    def clean(self):
+    def clean(self, *args, **kwargs):
         if self.ferm_type:
             self.ferm_type = u"%s" % self.ferm_type.lower()
-    
+        
     def __unicode__(self):
         return u"%s" % self.name
     
@@ -399,7 +421,7 @@ class MashStep(models.Model):
     Used within a Mash profile to record the steps
     """
     TYPE = (
-        (u"infusion", "Infusion"),
+        (u"infusion", u"Infusion"),
         (u"temperature", u"Temperature"),
         (u"decoction", u"Decoction")
     )
@@ -1188,3 +1210,4 @@ class RecipeOption(models.Model):
     
     def __unicode__(self):
         return u"%s Recipe options" % self.recipe.name
+
