@@ -2,8 +2,9 @@
 
 from error import BeerXMLError, BeerXMLValidationError
 
-from django.db.models.loading import get_model
 from django.utils.encoding import smart_str
+from django.db.models.base import Model
+from django.db.models.loading import get_model
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToOneRel, ManyToManyRel
 from django.core.exceptions import ValidationError
@@ -44,7 +45,7 @@ class BeerXMLNode(dict):
         assert isinstance(attrs, dict), \
             "attrs must be a dict of attributes"
         
-        self.__name__ = name
+        self.__name__ = name.upper()    # Always use upper case naming
         defaults = attrs.copy()
         for key, value in defaults.iteritems():
             # Switch names with model attribute names
@@ -64,7 +65,7 @@ class BeerXMLNode(dict):
                 field = self._model._meta.get_field(key)
                 value = field.to_python(value)
                 if isinstance(field.rel, ManyToOneRel):
-                    value = BeerXMLNode(field.name.upper(), value)
+                    value = BeerXMLNode(field.name, value)
                 if isinstance(field.rel, ManyToManyRel):
                     values = []
                     if value:
@@ -101,11 +102,87 @@ class BeerXMLNode(dict):
         return model
     _model = property(_get_node_model)
     
-    def save(self):
+    def save(self, force_insert=False, force_update=False, using=None):
         """
         Save this node and all dependent
         nodes to the database
         """
-        pass
-
+        def iter_field_type(node, field_type):
+            """
+            Iterates over a node, yielding all fields
+            which match field_type in a key, value paired
+            dict.
+            """
+            assert isinstance(node, BeerXMLNode), \
+                "must be an BeerXMLNode instance"
+            for key in node.iterkeys():
+                field = node._model._meta.get_field(key)
+                if isinstance(field.rel, field_type):
+                    yield {key: node.get(field.name)}
         
+        def get_clean_lookup(node):
+            """
+            Create a copy of this node without relations and
+            __fields__. This "should" be able to save to model
+            TODO: make pretty =)
+            """
+            lookup = dict([(k, v) for k, v in node.iteritems() if not "__" in k
+                           and not (any(k in x.keys() for x in iter_field_type(node, ManyToOneRel)) 
+                                    or any(k in x.keys() for x in iter_field_type(node, ManyToManyRel)))])
+            return lookup
+        
+        def save_node_relations(node, obj, force_insert=None, force_update=None):
+            """
+            node = BeerXMLNode(), obj = saved Model() instance.
+            
+            Traverse the current node, looking for many-to-one and 
+            many-to-many relations. If found, each relation is instantiated 
+            and saved, then this method is called recursive until all 
+            related nodes has been saved.
+            """
+            # This recurses too much, and might run for a while
+            # TODO: Add some kind of caching functionality.
+
+            assert isinstance(node, BeerXMLNode), \
+                "%s must be a BeerXMLNode instance." % node
+                
+            if isinstance(obj, Model):
+                if not obj.pk:
+                    raise BeerXMLError("%s must be a saved instance." % obj.__class__)
+            else:
+                raise BeerXMLError("%s must be a Model instance." % obj)
+            
+            try:
+                # Add many-to-one (ForeignKey) relations
+                for m2one in iter_field_type(node, ManyToOneRel):
+                    for field_name, n in m2one.iteritems():
+                        lookup = get_clean_lookup(n)
+                        rel_obj = n._model(**lookup)
+                        rel_obj.save(force_insert=force_insert, force_update=force_update)
+                        setattr(obj, field_name, rel_obj)
+                        save_node_relations(n, rel_obj, force_insert=force_insert, 
+                                            force_update=force_update)
+                
+                # Add many-to-many relations
+                for m2m in iter_field_type(node, ManyToManyRel):
+                    for field_name, n_list in m2m.iteritems():
+                        for n in n_list:
+                            lookup = get_clean_lookup(n)
+                            rel_obj = n._model(**lookup)
+                            rel_obj.save(force_insert=force_insert, force_update=force_update)
+                            # Ugly hack to add many-to-many relations
+                            # on arbitrary fields
+                            x = obj.__getattribute__(field_name)
+                            x.add(rel_obj)
+                            save_node_relations(n, rel_obj, force_insert=force_insert, 
+                                                force_update=force_update)
+            except Exception, e:
+                raise BeerXMLError(e)
+            
+        try:
+            lookup = get_clean_lookup(self)
+            obj = self._model(**lookup)
+            obj.save(force_insert=force_insert, force_update=force_update)
+            save_node_relations(self, obj)
+        except Exception, e:
+            raise BeerXMLError(e)
