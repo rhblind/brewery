@@ -13,16 +13,17 @@
 #  - http://www.beerxml.com/beerxml.htm
 #
 # Data formats:
+# All DecimalFields are this big to support scientific input numbers
 #  - Record         : Model (database table)
 #  - Text           : CharField or TextField dependent on situation
 #  - Integer        : IntegerField (may include negative values, 
 #                     except version which is PositiveSmallIntegerField)
-#  - Percentage     : DecimalField (max digits: 5, decimal places: 2 = max val 999.99)
-#  - Weight         : DecimalField (max_digits: 8, decimal_places: 4 = max val 9999.9999)
-#  - Temperature    : DecimalField (max_digits: 8, decimal_places: 4 = max val 9999.9999)
+#  - Percentage     : DecimalField (max digits: 14, decimal places: 9 = max val 99999.999999999)
+#  - Weight         : DecimalField (max_digits: 14, decimal_places: 9 = max val 99999.999999999)
+#  - Temperature    : DecimalField (max_digits: 14, decimal_places: 9 = max val 99999.999999999)
 #  - List           : CharField with choices (key=numeric index, value=display value)
-#  - Time           : DecimalField (max_digits: 6, decimal_places: 2 = max val 9999.99 seconds)
-#  - Floating Point : DecimalField (max_digits: 8, decimal_places: 4 = max val 9999.9999)
+#  - Time           : DecimalField (max_digits: 14, decimal_places: 9 = max val 99999.999999999)
+#  - Floating Point : DecimalField (max_digits: 14, decimal_places: 9 = max val 99999.999999999)
 #  - Boolean        : BooleanField
 #
 #
@@ -91,46 +92,46 @@ class Equipment(models.Model):
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1,
                                editable=False, help_text="XML version")
-    boil_size = models.DecimalField(_("boil size"), max_digits=8, 
-                decimal_places=4, help_text="""The pre-boil volume used 
+    boil_size = models.DecimalField(_("boil size"), max_digits=14, 
+                decimal_places=9, help_text="""The pre-boil volume used 
                 in this particular instance for this equipment setup.
                 Note that this may be a calculated value depending on the 
                 CALC_BOIL_VOLUME parameter.""")
-    batch_size = models.DecimalField(_("batch size"), max_digits=8, 
-                decimal_places=4, help_text="""The target volume of the 
+    batch_size = models.DecimalField(_("batch size"), max_digits=14, 
+                decimal_places=9, help_text="""The target volume of the 
                 batch at the start of fermentation.""")
-    tun_volume = models.DecimalField(_("tun volume (litres)"), max_digits=8,
-                decimal_places=4, blank=True, null=True, 
+    tun_volume = models.DecimalField(_("tun volume (litres)"), max_digits=14,
+                decimal_places=9, blank=True, null=True, 
                 help_text="""Volume of the mash tun in liters. This 
                 parameter can be used to calculate if a particular mash and 
                 grain profile will fit in the mash tun. It may also be used 
                 for thermal calculations in the case of a partially full 
                 mash tun.""")
-    tun_weight = models.DecimalField(_("tun weight (kilos)"), max_digits=8,
-                decimal_places=4, blank=True, null=True,
+    tun_weight = models.DecimalField(_("tun weight (kilos)"), max_digits=14,
+                decimal_places=9, blank=True, null=True,
                 help_text="""Weight of the mash tun in kilograms. 
                 Used primarily to calculate the thermal parameters of the 
                 mash tun – in conjunction with the volume and specific heat.""")
     tun_specific_heat = models.DecimalField(_("tun specific heat (cal/(g*K))"), 
-                max_digits=8, decimal_places=4, blank=True, null=True, 
+                max_digits=14, decimal_places=9, blank=True, null=True, 
                 help_text="""The specific heat of the mash tun which is usually 
                 a function of the material it is made of. Typical ranges are 
                 0.1-0.25 for metal and 0.2-0.5 for plastic materials.""")
-    top_up_water = models.DecimalField(_("top-up water"), max_digits=8, 
-                decimal_places=4, blank=True, null=True, 
+    top_up_water = models.DecimalField(_("top-up water"), max_digits=14, 
+                decimal_places=9, blank=True, null=True, 
                 help_text="""The amount of top up water normally added just prior
                  to starting fermentation. Usually used for extract brewing.""")
-    trub_chiller_loss = models.DecimalField(_("trub chiller loss"), max_digits=8, 
-                decimal_places=4, blank=True, null=True, help_text="""The amount 
+    trub_chiller_loss = models.DecimalField(_("trub chiller loss"), max_digits=14, 
+                decimal_places=9, blank=True, null=True, help_text="""The amount 
                 of wort normally lost during transition from the boiler to the 
                 fermentation vessel. Includes both unusable wort due to trub 
                 and wort lost to the chiller and transfer systems.""")
     evap_rate = models.DecimalField(_("evaporation rate (% per hour)"), 
-                max_digits=5, decimal_places=2, blank=True, null=True, 
+                max_digits=14, decimal_places=9, blank=True, null=True, 
                 help_text="""The percentage of wort lost to evaporation per 
                 hour of the boil.""")
-    boil_time = models.DecimalField(_("boil time (hours,minutes)"), max_digits=6, 
-                decimal_places=2, blank=True, null=True, help_text="""The normal 
+    boil_time = models.DecimalField(_("boil time (hours,minutes)"), max_digits=14, 
+                decimal_places=9, blank=True, null=True, help_text="""The normal 
                 amount of time one boils for this equipment setup. This can be 
                 used with the evaporation rate to calculate the evaporation loss.""")
     calc_boil_volume = models.BooleanField(_("calculate boil volume"), default=False, 
@@ -139,14 +140,14 @@ class Equipment(models.Model):
                 BOIL_SIZE = (BATCH_SIZE – TOP_UP_WATER – TRUB_CHILLER_LOSS) 
                               * (1 + BOIL_TIME * EVAP_RATE ) 
                 If set then the boil size should match this value.""")
-    lauter_deadspace = models.DecimalField(_("lauter deadspace (litres)"), max_digits=8, 
-                decimal_places=4, blank=True, null=True, help_text="""Amount lost to 
+    lauter_deadspace = models.DecimalField(_("lauter deadspace (litres)"), max_digits=14, 
+                decimal_places=9, blank=True, null=True, help_text="""Amount lost to 
                 the lauter tun and equipment associated with the lautering process.""")
-    top_up_kettle = models.DecimalField(_("kettle top-up water (litres)"), max_digits=8, 
-                decimal_places=4, blank=True, null=True, 
+    top_up_kettle = models.DecimalField(_("kettle top-up water (litres)"), max_digits=14, 
+                decimal_places=9, blank=True, null=True, 
                 help_text="Amount normally added to the boil kettle before the boil.")
-    hop_utilization = models.DecimalField(_("hop utilization %"), max_digits=5, 
-                decimal_places=2, blank=True, null=True, help_text="""Large batch 
+    hop_utilization = models.DecimalField(_("hop utilization %"), max_digits=14, 
+                decimal_places=9, blank=True, null=True, help_text="""Large batch 
                 hop utilization. This value should be 100% for batches less than 20 gallons, 
                 but may be higher (200% or more) for very large batch equipment.""")
     notes = models.TextField(_("notes"), blank=True, null=True)
@@ -223,14 +224,14 @@ class Fermentable(models.Model):
                                editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     ferm_type = models.CharField(_("fermentable type"), max_length=12, choices=TYPE)
-    amount = models.DecimalField(_("amount"), max_digits=8, decimal_places=4,
+    amount = models.DecimalField(_("amount"), max_digits=14, decimal_places=9,
             help_text="Weight of the fermentable, extract or sugar in Kilograms.")
     # NOTE: yield is a reserved python word.
-    ferm_yield = models.DecimalField(_("yield percentage"), max_digits=5, 
-            decimal_places=2, help_text="""Percent dry yield (fine grain) 
+    ferm_yield = models.DecimalField(_("yield percentage"), max_digits=14, 
+            decimal_places=9, help_text="""Percent dry yield (fine grain) 
             for the grain, or the raw yield by weight if this is an 
             extract adjunct or sugar.""")
-    color = models.DecimalField(_("color"), max_digits=8, decimal_places=4,
+    color = models.DecimalField(_("color"), max_digits=14, decimal_places=9,
             help_text="""The color of the item in Lovibond Units 
             (SRM for liquid extracts).""")
     add_after_boil = models.BooleanField(_("add after boil"), default=False,
@@ -240,24 +241,24 @@ class Fermentable(models.Model):
     origin = models.CharField(_("origin country"), max_length=100, blank=True, null=True)
     supplier = models.TextField(_("supplier"), blank=True, null=True)
     notes = models.TextField(_("notes"), blank=True, null=True)
-    coarse_fine_diff = models.DecimalField(_("coarse/fine percentage"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, help_text="""Percent difference 
+    coarse_fine_diff = models.DecimalField(_("coarse/fine percentage"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""Percent difference 
             between the coarse grain yield and fine grain yield.  Only appropriate for 
             a "Grain" or "Adjunct" type, otherwise this value is ignored.""")
-    moisture = models.DecimalField(_("moisture percentage"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, help_text="""Percent 
+    moisture = models.DecimalField(_("moisture percentage"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""Percent 
             moisture in the grain. Only appropriate for a "Grain" or "Adjunct" type, 
             otherwise this value is ignored.""")
-    diastatic_power = models.DecimalField(_("diastatic power"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""The diastatic power 
+    diastatic_power = models.DecimalField(_("diastatic power"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""The diastatic power 
             of the grain as measured in "Lintner" units. Only appropriate for a 
             "Grain" or "Adjunct" type, otherwise this value is ignored.""")
-    protein = models.DecimalField(_("protein percentage"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, help_text="""The percent 
+    protein = models.DecimalField(_("protein percentage"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""The percent 
             protein in the grain. Only appropriate for a "Grain" or "Adjunct" type, 
             otherwise this value is ignored.""")
-    max_in_batch = models.DecimalField(_("max percentage per batch"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, help_text="""The recommended 
+    max_in_batch = models.DecimalField(_("max percentage per batch"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""The recommended 
             maximum percentage (by weight) this ingredient should represent in a 
             batch of beer.""")
     recommend_mash = models.NullBooleanField(_("recommended mash"), default=False, 
@@ -266,8 +267,8 @@ class Fermentable(models.Model):
             for a "Grain" or "Adjunct" types. The default value is False. Note that 
             this does NOT indicate whether the grain is mashed or not – it is only 
             a recommendation used in recipe formulation.""")
-    ibu_gal_per_lb = models.DecimalField(_("bitterness (IBU*gal/lb)"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""For hopped extracts 
+    ibu_gal_per_lb = models.DecimalField(_("bitterness (IBU*gal/lb)"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""For hopped extracts 
             only - an estimate of the number of IBUs per pound of extract in a gallon 
             of water. To convert to IBUs we multiply this number by the "Amount" 
             field (in pounds) and divide by the number of gallons in the batch. 
@@ -279,7 +280,7 @@ class Fermentable(models.Model):
             null=True, help_text="""The amount of fermentables in this record along 
             with the units formatted for easy display in the current user defined units. 
             For example “1.5 lbs” or “2.1 kg”.""")
-    potential = models.DecimalField(_("potential"), max_digits=8, decimal_places=4, 
+    potential = models.DecimalField(_("potential"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="""The yield of the fermentable converted 
             to specific gravity units for display. For example “1.036” or “1.040” 
             might be valid potentials.""")
@@ -342,17 +343,17 @@ class Hop(models.Model):
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
                                editable=False, help_text="XML version")
-    alpha = models.DecimalField(_("alpha percentage"), max_digits=5, 
-            decimal_places=2, help_text="""Percent alpha of hops 
+    alpha = models.DecimalField(_("alpha percentage"), max_digits=14, 
+            decimal_places=9, help_text="""Percent alpha of hops 
             - for example "5.5" represents 5.5% alpha""")
-    amount = models.DecimalField(_("amount"), max_digits=8, decimal_places=4,
+    amount = models.DecimalField(_("amount"), max_digits=14, decimal_places=9,
             help_text="Weight in Kilograms of the hops used in the recipe.")
     use = models.CharField(_("usage"), max_length=12, choices=USE,
             help_text="""Note that Aroma and Dry Hop do not contribute to the 
             bitterness of the beer while the others do.  Aroma hops are added 
             after the boil and do not contribute substantially to beer 
             bitterness.""")
-    time = models.DecimalField(_("time"), max_digits=6, decimal_places=2,
+    time = models.DecimalField(_("time"), max_digits=14, decimal_places=9,
             help_text="""The time as measured in minutes. Meaning is dependent 
             on the “usage” field. For “Boil” this is the boil time.  For “Mash” 
             this is the mash time. For “First Wort” this is the boil time. 
@@ -363,20 +364,23 @@ class Hop(models.Model):
     hop_type = models.CharField(_("hop type"), max_length=12, choices=TYPE, 
                                 blank=True, null=True)
     form = models.CharField(_("hop form"), max_length=12, choices=FORM, blank=True, null=True)
-    beta = models.DecimalField(_("beta percentage"), max_digits=5, decimal_places=2, 
+    beta = models.DecimalField(_("beta percentage"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="""Hop beta percentage 
             - for example "4.4" denotes 4.4 % beta""")
-    hsi = models.DecimalField(_("HSI"), max_digits=5, decimal_places=2, blank=True, 
+    hsi = models.DecimalField(_("HSI"), max_digits=14, decimal_places=9, blank=True, 
             null=True, help_text="""Hop Stability Index - defined as the percentage 
             of hop alpha lost in 6 months of storage""")
     origin = models.CharField(_("origin"), max_length=100, blank=True, null=True)
     substitutes = models.TextField(_("substitutes"), blank=True, null=True, 
             help_text="Substitutes that can be used for this hops")
-    humulene = models.DecimalField(_("humulene percentage"), max_digits=5, decimal_places=2)
-    caryophyllene = models.DecimalField(_("caryophyllene percentage"), max_digits=5, 
-                                        decimal_places=2)
-    cohumulone = models.DecimalField(_("cohumulone percentage"), max_digits=5, decimal_places=2)
-    myrcene = models.DecimalField(_("myrcene percentage"), max_digits=5, decimal_places=2)
+    humulene = models.DecimalField(_("humulene percentage"), max_digits=14, decimal_places=9,
+                                   blank=True, null=True)
+    caryophyllene = models.DecimalField(_("caryophyllene percentage"), max_digits=14, 
+                                        decimal_places=9, blank=True, null=True)
+    cohumulone = models.DecimalField(_("cohumulone percentage"), max_digits=14, decimal_places=9,
+                                     blank=True, null=True)
+    myrcene = models.DecimalField(_("myrcene percentage"), max_digits=14, decimal_places=9,
+                                  blank=True, null=True)
     
     # Optional extension for BeerXML display
     display_amount = models.CharField(_("display amount"), max_length=50, 
@@ -436,21 +440,21 @@ class MashStep(models.Model):
             on the type of step. Infusion denotes adding hot water, Temperature 
             denotes heating with an outside heat source, and decoction denotes 
             drawing off some mash for boiling.""")
-    infuse_amount = models.DecimalField(_("infuse amount"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""The volume of 
+    infuse_amount = models.DecimalField(_("infuse amount"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""The volume of 
             water in liters to infuse in this step. Required only for infusion steps, 
             though one may also add water for temperature mash steps. One should 
             not have an infusion amount for decoction steps.""")
-    step_temp = models.DecimalField(_("step temperature"), max_digits=8, decimal_places=4, 
+    step_temp = models.DecimalField(_("step temperature"), max_digits=14, decimal_places=9, 
             help_text="The target temperature for this step in degrees Celsius.")
-    step_time = models.DecimalField(_("step time"), max_digits=6, decimal_places=2, 
+    step_time = models.DecimalField(_("step time"), max_digits=14, decimal_places=9, 
             help_text="""The number of minutes to spend at this step – i.e. the 
             amount of time we are to hold this particular step temperature.""")
-    ramp_time = models.DecimalField(_("ramp time"), max_digits=6, decimal_places=2, 
+    ramp_time = models.DecimalField(_("ramp time"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="""Time in minutes to achieve the 
             desired step temperature – useful particularly for temperature mashes where 
             it may take some time to achieve the step temperature.""")
-    end_temp = models.DecimalField(_("end temperature"), max_digits=10, decimal_places=3, 
+    end_temp = models.DecimalField(_("end temperature"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="""The temperature you can expect the mash to 
             fall to after a long mash step. Measured in degrees Celsius.""")
     
@@ -514,25 +518,25 @@ class MashProfile(models.Model):
     name = models.CharField(_("name"), max_length=100, blank=True, null=True)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
                                        editable=False, help_text="XML version")
-    grain_temp = models.DecimalField(_("grain temperature"), max_digits=8, 
-            decimal_places=4, help_text="""The temperature of the grain before 
+    grain_temp = models.DecimalField(_("grain temperature"), max_digits=14, 
+            decimal_places=9, help_text="""The temperature of the grain before 
             adding it to the mash in degrees Celsius.""")
     mash_steps = models.ManyToManyField(MashStep)
     notes = models.TextField(_("notes"), blank=True, null=True)
-    tun_temp = models.DecimalField(_("tun temperature"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""Grain tun 
+    tun_temp = models.DecimalField(_("tun temperature"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""Grain tun 
             temperature – may be used to adjust the infusion temperature for 
             equipment if the program supports it. Measured in degrees C.""")
-    sparge_temp = models.DecimalField(_("sparge temperature"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, 
+    sparge_temp = models.DecimalField(_("sparge temperature"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, 
             help_text="Temperature of the sparge water used in degrees Celsius.")
-    ph = models.DecimalField(_("sparge PH"), max_digits=8, decimal_places=4, 
+    ph = models.DecimalField(_("sparge PH"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="PH of the sparge.")
-    tun_weight = models.DecimalField(_("tun weight (kilos)"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, 
+    tun_weight = models.DecimalField(_("tun weight (kilos)"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, 
             help_text="Weight of the mash tun in kilograms")
-    tun_specific_heat = models.DecimalField(_("tun specific heat"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, 
+    tun_specific_heat = models.DecimalField(_("tun specific heat"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, 
             help_text="Specific heat of the tun material in calories per gram-degree C.")
     equip_adjust = models.BooleanField(_("adjust from equipment"), default=False, 
             help_text="""If True, mash infusion and decoction calculations should take 
@@ -595,9 +599,9 @@ class Misc(models.Model):
     # NOTE: type is a reserved python word.
     misc_type = models.CharField(_("hop type"), max_length=12, choices=TYPE, default=4)
     use = models.CharField(_("hop type"), max_length=12, choices=USE, default=2)
-    time = models.DecimalField(_("time"), max_digits=6, decimal_places=2,
+    time = models.DecimalField(_("time"), max_digits=14, decimal_places=9,
             help_text="Amount of time the misc was boiled, steeped, mashed, etc in minutes.")
-    amount = models.DecimalField(_("yield percentage"), max_digits=8, decimal_places=2,
+    amount = models.DecimalField(_("yield percentage"), max_digits=14, decimal_places=9,
             help_text="""Amount of item used. The default measurements are by weight, 
             but this may be the measurement in volume units if AMOUNT_IS_WEIGHT is set 
             to TRUE for this record. For liquid items this is liters, for solid the  
@@ -681,7 +685,7 @@ class Yeast(models.Model):
     yiest_type = models.CharField(_("yeast type"), max_length=12, choices=TYPE, 
                                   default=1)
     form = models.CharField(_("yeast form"), max_length=12, choices=FORM, default=1)
-    amount = models.DecimalField(_("amount"), max_digits=8, decimal_places=4,
+    amount = models.DecimalField(_("amount"), max_digits=14, decimal_places=9,
             help_text="""The amount of yeast, measured in liters. For a starter this is the 
             size of the starter. If the flag AMOUNT_IS_WEIGHT is set to TRUE then this 
             measurement is in kilograms and not liters.""")
@@ -694,17 +698,17 @@ class Yeast(models.Model):
     product_id = models.CharField(_("product id"), max_length=100, blank=True, null=True,
             help_text="""The manufacturer’s product ID label or number that identifies this 
             particular strain of yeast.""")
-    min_temperature = models.DecimalField(_("min temperature"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""The minimum 
+    min_temperature = models.DecimalField(_("min temperature"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""The minimum 
             recommended temperature for fermenting this yeast strain in degrees 
             Celsius.""")
-    max_temperature = models.DecimalField(_("max temperature"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""The maximum 
+    max_temperature = models.DecimalField(_("max temperature"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""The maximum 
             recommended temperature for fermenting this yeast strain in Celsius.""")
     flocculation = models.CharField(_("yeast form"), max_length=12, choices=FLOCCULATION, 
                                     default=1, blank=True, null=True)
-    attenuation = models.DecimalField(_("attenuation percentage"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, help_text="""Average 
+    attenuation = models.DecimalField(_("attenuation percentage"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""Average 
             attenuation for this yeast strain.""")
     notes = models.TextField(_("notes"), blank=True, null=True)
     best_for = models.TextField(_("best for"), blank=True, null=True,
@@ -771,21 +775,21 @@ class Water(models.Model):
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1, 
                                        editable=False, help_text="XML version")
-    amount = models.DecimalField(_("amount"), max_digits=8, decimal_places=4,
+    amount = models.DecimalField(_("amount"), max_digits=14, decimal_places=9,
             help_text="Volume of water to use in a recipe in liters.")
-    calcium = models.DecimalField(_("calcium"), max_digits=8, decimal_places=4,
+    calcium = models.DecimalField(_("calcium"), max_digits=14, decimal_places=9,
             help_text="The amount of calcium (Ca) in parts per million.")
-    bicarbonate = models.DecimalField(_("bicarbonate"), max_digits=8, decimal_places=4,
+    bicarbonate = models.DecimalField(_("bicarbonate"), max_digits=14, decimal_places=9,
             help_text="The amount of bicarbonate (HCO3) in parts per million.")
-    sulfate = models.DecimalField(_("sulfate"), max_digits=8, decimal_places=4, 
+    sulfate = models.DecimalField(_("sulfate"), max_digits=14, decimal_places=9, 
             help_text="The amount of Sulfate (SO4) in parts per million.")
-    chloride = models.DecimalField(_("chloride"), max_digits=8, decimal_places=4,
+    chloride = models.DecimalField(_("chloride"), max_digits=14, decimal_places=9,
             help_text="The amount of Chloride (Cl) in parts per million.")
-    sodium = models.DecimalField(_("sodium"), max_digits=8, decimal_places=4,
+    sodium = models.DecimalField(_("sodium"), max_digits=14, decimal_places=9,
             help_text="The amount of Sodium (Na) in parts per million.")
-    magnesium = models.DecimalField(_("magnesium"), max_digits=8, decimal_places=4,
+    magnesium = models.DecimalField(_("magnesium"), max_digits=14, decimal_places=9,
             help_text="The amount of Magnesium (Mg) in parts per million.")
-    ph = models.DecimalField(_("PH"), max_digits=8, decimal_places=4, blank=True,
+    ph = models.DecimalField(_("PH"), max_digits=14, decimal_places=9, blank=True,
             null=True, help_text="The PH value of the water")
     notes = models.TextField(_("notes"), blank=True, null=True)
     
@@ -847,36 +851,36 @@ class Style(models.Model):
     style_type = models.CharField(_("type"), max_length=12, choices=TYPE, default=1,
             help_text="""May be “Lager”, “Ale”, “Mead”, “Wheat”, “Mixed” or “Cider”. 
             Defines the type of beverage associated with this category.""")
-    og_min = models.DecimalField(_("min OG"), max_digits=8, decimal_places=4, 
+    og_min = models.DecimalField(_("min OG"), max_digits=14, decimal_places=9, 
             help_text="""The minimum specific gravity as measured relative to water. 
             For example “1.040” might be a reasonable minimum for a Pale Ale.""")
-    og_max = models.DecimalField(_("max OG"), max_digits=8, decimal_places=4,
+    og_max = models.DecimalField(_("max OG"), max_digits=14, decimal_places=9,
             help_text="The maximum specific gravity as measured relative to water.")
-    fg_min = models.DecimalField(_("min FG"), max_digits=8, decimal_places=4,
+    fg_min = models.DecimalField(_("min FG"), max_digits=14, decimal_places=9,
             help_text="The minimum final gravity as measured relative to water.")
-    fg_max = models.DecimalField(_("max FG"), max_digits=8, decimal_places=4,
+    fg_max = models.DecimalField(_("max FG"), max_digits=14, decimal_places=9,
             help_text="The maximum final gravity as measured relative to water.")
-    ibu_min = models.DecimalField(_("min IBU"), max_digits=8, decimal_places=3, 
+    ibu_min = models.DecimalField(_("min IBU"), max_digits=14, decimal_places=9, 
             help_text="""The recommended minimum bitterness for this style as measured 
             in International Bitterness Units (IBUs)""")
-    ibu_max = models.DecimalField(_("max IBU"), max_digits=8, decimal_places=3, 
+    ibu_max = models.DecimalField(_("max IBU"), max_digits=14, decimal_places=9, 
             help_text="""The recommended maximum bitterness for this style as measured 
             in International Bitterness Units (IBUs)""")
-    color_min = models.DecimalField(_("min color(SRM)"), max_digits=8, decimal_places=4,
+    color_min = models.DecimalField(_("min color(SRM)"), max_digits=14, decimal_places=9,
             help_text="The minimum recommended color in SRM")
-    color_max = models.DecimalField(_("max color(SRM)"), max_digits=8, decimal_places=4,
+    color_max = models.DecimalField(_("max color(SRM)"), max_digits=14, decimal_places=9,
             help_text="The maximum recommended color in SRM.")
-    abv_min = models.DecimalField(_("min ABV %"), max_digits=5, decimal_places=2, 
+    abv_min = models.DecimalField(_("min ABV %"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="""The minimum recommended alcohol by 
             volume as a percentage.""")
-    abv_max = models.DecimalField(_("max ABV %"), max_digits=5, decimal_places=2, 
+    abv_max = models.DecimalField(_("max ABV %"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="""The maximum recommended alcohol by 
             volume as a percentage.""")
-    carb_min = models.DecimalField(_("min carb (vols of CO2)"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""Minimum recommended 
+    carb_min = models.DecimalField(_("min carb (vols of CO2)"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""Minimum recommended 
             carbonation for this style in volumes of CO2""")
-    carb_max = models.DecimalField(_("max carb (vols of CO2)"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""The maximum 
+    carb_max = models.DecimalField(_("max carb (vols of CO2)"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""The maximum 
             recommended carbonation for this style in volumes of CO2""")
     notes = models.TextField(_("notes"), blank=True, null=True)
     profile = models.TextField(_("profile"), blank=True, null=True, 
@@ -970,13 +974,13 @@ class Recipe(models.Model):
     brewer = models.CharField(_("name of brewer"), max_length=100)
     asst_brewer = models.CharField(_("assistant brewer"), max_length=100, blank=True, 
                                    null=True)
-    batch_size = models.DecimalField(_("batch size"), max_digits=8, decimal_places=4,
+    batch_size = models.DecimalField(_("batch size"), max_digits=14, decimal_places=9,
             help_text="Target size of the finished batch in liters.")
-    boil_size = models.DecimalField(_("boil size"), max_digits=8, decimal_places=4,
+    boil_size = models.DecimalField(_("boil size"), max_digits=14, decimal_places=9,
             help_text="Starting size for the main boil of the wort in liters.")
-    boil_time = models.DecimalField(_("boil time"), max_digits=6, decimal_places=2,
+    boil_time = models.DecimalField(_("boil time"), max_digits=14, decimal_places=9,
             help_text="The total time to boil the wort in minutes.")
-    efficiency = models.DecimalField(_("efficiency"), max_digits=6, decimal_places=2, 
+    efficiency = models.DecimalField(_("efficiency"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="""The percent brewhouse efficiency to be 
             used for estimating the starting gravity of the beer. Not required for 
             “Extract” recipes, but is required for “Partial Mash” and “All Grain” recipes.""")
@@ -995,45 +999,45 @@ class Recipe(models.Model):
             NOTE: No Mash record is needed for “Extract” type brews.""")
     notes = models.TextField(_("notes"), blank=True, null=True)
     taste_notes = models.TextField(_("taste notes"), blank=True, null=True)
-    taste_rating = models.DecimalField(_("taste rating BJCP"), max_digits=4, 
-            decimal_places=2, blank=True, null=True, help_text="""Number between 
+    taste_rating = models.DecimalField(_("taste rating BJCP"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""Number between 
             zero and 50.0 denoting the taste rating – corresponds to the 50 point
              BJCP rating system.""")
-    og = models.DecimalField(_("OG"), max_digits=8, decimal_places=4, blank=True, 
+    og = models.DecimalField(_("OG"), max_digits=14, decimal_places=9, blank=True, 
             null=True, help_text="""The measured original (pre-fermentation) 
             specific gravity of the beer.""")
-    fg = models.DecimalField(_("FG"), max_digits=8, decimal_places=4, blank=True, 
+    fg = models.DecimalField(_("FG"), max_digits=14, decimal_places=9, blank=True, 
             null=True, help_text="The measured final gravity of the finished beer.")
     fermentation_stages = models.PositiveSmallIntegerField(_("fermentation stages"), 
             blank=True, null=True, help_text="""The number of fermentation stages 
             used – typically a number between one and three""")
-    primary_age = models.DecimalField(_("primary age (days)"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, 
+    primary_age = models.DecimalField(_("primary age (days)"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, 
             help_text="Time spent in the primary in days")
     primary_temp = models.DecimalField(_("primary temperature (Celsius)"), 
-            max_digits=8, decimal_places=4, blank=True, null=True, 
+            max_digits=14, decimal_places=9, blank=True, null=True, 
             help_text="Temperature in degrees Celsius for the primary fermentation")
-    secondary_age = models.DecimalField(_("secondary age (days)"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, 
+    secondary_age = models.DecimalField(_("secondary age (days)"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, 
             help_text="Time spent in the secondary in days")
     secondary_temp = models.DecimalField(_("secondary temperature (Celsius)"), 
-            max_digits=8, decimal_places=4, blank=True, null=True, 
+            max_digits=14, decimal_places=9, blank=True, null=True, 
             help_text="Temperature in degrees Celsius for the secondary fermentation")
-    tertiary_age = models.DecimalField(_("tertiary age (days)"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, 
+    tertiary_age = models.DecimalField(_("tertiary age (days)"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, 
             help_text="Time spent in the third fermenter in days")
     tertiary_temp = models.DecimalField(_("tertiary temperature (Celsius)"), 
-            max_digits=8, decimal_places=4, blank=True, null=True, 
+            max_digits=14, decimal_places=9, blank=True, null=True, 
             help_text="Temperature in the tertiary fermenter")
-    age = models.DecimalField(_("age"), max_digits=5, decimal_places=2, blank=True, 
+    age = models.DecimalField(_("age"), max_digits=14, decimal_places=9, blank=True, 
             null=True, help_text="The time to age the beer in days after bottling")
-    age_temp = models.DecimalField(_("age temperature"), max_digits=8, decimal_places=4, 
+    age_temp = models.DecimalField(_("age temperature"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="Temperature for aging the beer after bottling")
     date = models.CharField(_("date"), max_length=50, blank=True, null=True,
             help_text="Brew date in a easily recognizable format such as “3 Dec 04”.")
     real_date = models.DateField(_("real date"), blank=True, null=True, 
             help_text="Brew date in a computer-readable format")
-    carbonation = models.DecimalField(_("carbonation"), max_digits=8, decimal_places=4, 
+    carbonation = models.DecimalField(_("carbonation"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="""Floating point value corresponding to the 
             target volumes of CO2 used to carbonate this beer""")
     forced_carbonation = models.BooleanField(_("forced carbonation"), default=False, 
@@ -1042,18 +1046,18 @@ class Recipe(models.Model):
     priming_sugar_name = models.CharField(_("priming sugar name"), max_length=50, blank=True, 
             null=True, help_text="""Text describing the priming agent such as “Honey” or 
             “Corn Sugar” – used only if this is _not_ a forced carbonation""")
-    carbonation_temp = models.DecimalField(_("carbonation temperature (Celsius)"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, 
+    carbonation_temp = models.DecimalField(_("carbonation temperature (Celsius)"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, 
             help_text="The temperature for either bottling or forced carbonation")
-    priming_sugar_equiv = models.DecimalField(_("priming sugar equivalent"), max_digits=8,
-            decimal_places=4, blank=True, null=True, help_text="""Factor used to 
+    priming_sugar_equiv = models.DecimalField(_("priming sugar equivalent"), max_digits=14,
+            decimal_places=9, blank=True, null=True, help_text="""Factor used to 
             convert this priming agent to an equivalent amount of corn sugar 
             for a bottled scenario. For example, “Dry Malt Extract” would have 
             a value of 1.4 because it requires 1.4 times as much DME as corn sugar 
             to carbonate. To calculate the amount of DME needed, the program can 
             calculate the amount of corn sugar needed and then multiply by this factor.""")
-    keg_priming_factor = models.DecimalField(_("keg priming factor"), max_digits=8, 
-            decimal_places=4, blank=True, null=True, help_text="""Used to factor in 
+    keg_priming_factor = models.DecimalField(_("keg priming factor"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, help_text="""Used to factor in 
             the smaller amount of sugar needed for large containers. For example, 
             this might be 0.5 for a typical 5 gallon keg since naturally priming a 
             keg requires about 50% as much sugar as priming bottles""")
@@ -1067,17 +1071,17 @@ class Recipe(models.Model):
             gravity of this recipe along with the units as in “1.015 sg”""")
     est_color = models.CharField(_("estimated color"), max_length=50, blank=True, 
             null=True, help_text="The estimated color of the beer in user defined color units")
-    ibu = models.DecimalField(_("IBU"), max_digits=8, decimal_places=3, blank=True, 
+    ibu = models.DecimalField(_("IBU"), max_digits=14, decimal_places=9, blank=True, 
             null=True, help_text="The estimated bitterness level of the beer in IBUs")
     ibu_method = models.CharField(_("IBU method"), max_length=12, choices=IBU_METHOD, 
             blank=True, null=True, help_text="""May be “Rager”, “Tinseth” or “Garetz” 
             corresponding to the method/equation used to estimate IBUs for this recipe""")
-    est_abv = models.DecimalField(_("estimated ABV"), max_digits=5, decimal_places=2, 
+    est_abv = models.DecimalField(_("estimated ABV"), max_digits=14, decimal_places=9, 
             blank=True, null=True, help_text="Estimated percent alcohol by volume for this recipe")
-    abv = models.DecimalField(_("ABV"), max_digits=5, decimal_places=2, blank=True, null=True,
+    abv = models.DecimalField(_("ABV"), max_digits=14, decimal_places=9, blank=True, null=True,
             help_text="Actual alcohol by volume calculated from the OG and FG measured")
-    actual_efficiency = models.DecimalField(_("actual efficiency"), max_digits=5, 
-            decimal_places=2, blank=True, null=True, 
+    actual_efficiency = models.DecimalField(_("actual efficiency"), max_digits=14, 
+            decimal_places=9, blank=True, null=True, 
             help_text="The actual efficiency as calculated using the measured original and final gravity")
     calories = models.CharField(_("calories"), max_length=50, blank=True, null=True,
             help_text="""Calorie estimate based on the measured starting and ending gravity. 
