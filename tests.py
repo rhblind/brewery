@@ -8,12 +8,15 @@ from django.test import TestCase
 
 from beerxml import parser
 from beerxml.models import BeerXMLNode
+from django.db.models.base import Model
 
 EXAMPLES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 
                             "docs", "beerxml-examples")
+
+# NOTE: We don't test the recipes.xml because it's not valid 
+# by BeerXML v1 validation standards
 FILES = ("equipment.xml", "grain.xml", "hops.xml", "mash.xml",
-         "misc.xml", "recipes.xml", "style.xml", "water.xml",
-         "yeast.xml")
+         "misc.xml", "style.xml", "water.xml", "yeast.xml")
 
 class BeerXMLParserTestCase(TestCase):
     """
@@ -147,13 +150,21 @@ class BeerXMLNodeTestCase(TestCase):
                         # test other dict methods
                         self.assertTrue(node.has_key("brave_sir_knight"))
                         self.assertEqual(node.get("rats"), 6)
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
+    
+    
+    def test_get_or_create(self):
+        """
+        test the get_or_create() method on
+        BeerXMLNode, which are used to save new
+        recipes to database
+        """
+        for f in FILES:
+            with open(os.path.join(EXAMPLES_DIR, f), "r") as fname:
+                nodetree = parser.to_beerxml(fname)
+                for nodelist in nodetree.itervalues():
+                    for node in nodelist:
+                        obj, created = node.get_or_create()
+                        self.assertIsInstance(obj, Model, "is not a model instance")
+                        self.assertTrue(created, "was not created")
                     
+            
