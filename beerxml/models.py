@@ -83,6 +83,10 @@ class BeerXMLNode(dict):
                 raise BeerXMLValidationError(e)
             except Exception, e:
                 raise BeerXMLError(e)
+        
+        # Cache up related fields to save some iterations on save
+        self.many_to_many = list(self.iter_field_type(ManyToManyRel))
+        self.many_to_one = list(self.iter_field_type(ManyToOneRel))
     
     def __repr__(self):
         # Shamelessly copied from django
@@ -102,24 +106,22 @@ class BeerXMLNode(dict):
         return model
     _model = property(_get_node_model)
     
+    def iter_field_type(self, field_type):
+        """
+        Iterates over a node, yielding all fields
+        which match field_type in a key, value paired
+        dict.
+        """
+        for key in self.iterkeys():
+            field = self._model._meta.get_field(key)
+            if isinstance(field.rel, field_type):
+                yield {key: self.get(field.name)}
+    
     def get_or_create(self, **kwargs):
         """
         Save this node and all dependent
         nodes to the database
         """
-        def iter_field_type(node, field_type):
-            """
-            Iterates over a node, yielding all fields
-            which match field_type in a key, value paired
-            dict.
-            """
-            assert isinstance(node, BeerXMLNode), \
-                "must be an BeerXMLNode instance"
-            for key in node.iterkeys():
-                field = node._model._meta.get_field(key)
-                if isinstance(field.rel, field_type):
-                    yield {key: node.get(field.name)}
-        
         def get_clean_lookup(node):
             """
             Create a copy of this node without relations and
@@ -127,8 +129,8 @@ class BeerXMLNode(dict):
             TODO: make pretty =)
             """
             lookup = dict([(k, v) for k, v in node.iteritems() if not "__" in k
-                           and not (any(k in x.keys() for x in iter_field_type(node, ManyToOneRel)) 
-                                    or any(k in x.keys() for x in iter_field_type(node, ManyToManyRel)))])
+                           and not (any(k in x.keys() for x in node.many_to_one) 
+                                    or any(k in x.keys() for x in node.many_to_many))])
             return lookup
         
         def save_node_relations(node, obj, **kwargs):
@@ -144,9 +146,6 @@ class BeerXMLNode(dict):
             and saved, then this method is called recursive until all 
             related nodes has been saved.
             """
-            # This recurses too much, and might run for a while
-            # TODO: Add some kind of caching functionality.
-
             assert isinstance(node, BeerXMLNode), \
                 "%s must be a BeerXMLNode instance." % node
                 
@@ -160,7 +159,7 @@ class BeerXMLNode(dict):
             try:
                 # TODO: use get_or_create()
                 # Add many-to-one (ForeignKey) relations
-                for m2one in iter_field_type(node, ManyToOneRel):
+                for m2one in node.many_to_one:
                     for field_name, n in m2one.iteritems():
                         lookup = get_clean_lookup(n)
                         lookup.update(inherit)
@@ -169,7 +168,7 @@ class BeerXMLNode(dict):
                         save_node_relations(n, rel_obj)
                 
                 # Add many-to-many relations
-                for m2m in iter_field_type(node, ManyToManyRel):
+                for m2m in node.many_to_many:
                     for field_name, n_list in m2m.iteritems():
                         for n in n_list:
                             lookup = get_clean_lookup(n)
