@@ -12,11 +12,8 @@ from django.db.models.base import Model
 
 EXAMPLES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 
                             "docs", "beerxml-examples")
-
-# NOTE: We don't test the recipes.xml because it's not valid 
-# by BeerXML v1 validation standards
 FILES = ("equipment.xml", "grain.xml", "hops.xml", "mash.xml",
-         "misc.xml", "style.xml", "water.xml", "yeast.xml")
+         "misc.xml", "recipes.xml", "style.xml", "water.xml", "yeast.xml")
 
 class BeerXMLParserTestCase(TestCase):
     """
