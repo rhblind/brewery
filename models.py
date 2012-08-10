@@ -113,63 +113,56 @@ class Equipment(BeerXMLBase):
     """
 
     boil_size = models.DecimalField(_("boil size"), max_digits=14, 
-                decimal_places=9, help_text="""The pre-boil volume used 
-                in this particular instance for this equipment setup.
-                Note that this may be a calculated value depending on the 
-                CALC_BOIL_VOLUME parameter.""")
+            decimal_places=9, help_text="""The pre-boil volume used in this 
+            particular instance for this equipment setup. Note that this may 
+            be a calculated value depending on the CALC_BOIL_VOLUME parameter.""")
     batch_size = models.DecimalField(_("batch size"), max_digits=14, 
-                decimal_places=9, help_text="""The target volume of the 
-                batch at the start of fermentation.""")
+            decimal_places=9, help_text="""The target volume of the batch at the 
+            start of fermentation.""")
     tun_volume = models.DecimalField(_("tun volume (litres)"), max_digits=14,
-                decimal_places=9, blank=True, null=True, 
-                help_text="""Volume of the mash tun in liters. This 
-                parameter can be used to calculate if a particular mash and 
-                grain profile will fit in the mash tun. It may also be used 
-                for thermal calculations in the case of a partially full 
-                mash tun.""")
+            decimal_places=9, blank=True, null=True, help_text="""Volume of the 
+            mash tun in liters. This parameter can be used to calculate if a 
+            particular mash and grain profile will fit in the mash tun. It may also 
+            be used for thermal calculations in the case of a partially full 
+            mash tun.""")
     tun_weight = models.DecimalField(_("tun weight (kilos)"), max_digits=14,
-                decimal_places=9, blank=True, null=True,
-                help_text="""Weight of the mash tun in kilograms. 
-                Used primarily to calculate the thermal parameters of the 
-                mash tun – in conjunction with the volume and specific heat.""")
+            decimal_places=9, blank=True, null=True, help_text="""Weight of the 
+            mash tun in kilograms. Used primarily to calculate the thermal parameters 
+            of the mash tun – in conjunction with the volume and specific heat.""")
     tun_specific_heat = models.DecimalField(_("tun specific heat (cal/(g*K))"), 
-                max_digits=14, decimal_places=9, blank=True, null=True, 
-                help_text="""The specific heat of the mash tun which is usually 
-                a function of the material it is made of. Typical ranges are 
-                0.1-0.25 for metal and 0.2-0.5 for plastic materials.""")
+            max_digits=14, decimal_places=9, blank=True, null=True, help_text="""The 
+            specific heat of the mash tun which is usually a function of the material 
+            it is made of. Typical ranges are 0.1-0.25 for metal and 0.2-0.5 for 
+            plastic materials.""")
     top_up_water = models.DecimalField(_("top-up water"), max_digits=14, 
-                decimal_places=9, blank=True, null=True, 
-                help_text="""The amount of top up water normally added just prior
-                 to starting fermentation. Usually used for extract brewing.""")
+            decimal_places=9, blank=True, null=True, help_text="""The amount of top 
+            up water normally added just prior to starting fermentation. Usually 
+            used for extract brewing.""")
     trub_chiller_loss = models.DecimalField(_("trub chiller loss"), max_digits=14, 
-                decimal_places=9, blank=True, null=True, help_text="""The amount 
-                of wort normally lost during transition from the boiler to the 
-                fermentation vessel. Includes both unusable wort due to trub 
-                and wort lost to the chiller and transfer systems.""")
+            decimal_places=9, blank=True, null=True, help_text="""The amount of wort 
+            normally lost during transition from the boiler to the fermentation vessel. 
+            Includes both unusable wort due to trub and wort lost to the chiller and 
+            transfer systems.""")
     evap_rate = models.DecimalField(_("evaporation rate (% per hour)"), 
-                max_digits=14, decimal_places=9, blank=True, null=True, 
-                help_text="""The percentage of wort lost to evaporation per 
-                hour of the boil.""")
+            max_digits=14, decimal_places=9, blank=True, null=True, help_text="""The 
+            percentage of wort lost to evaporation per hour of the boil.""")
     boil_time = models.DecimalField(_("boil time (hours,minutes)"), max_digits=14, 
-                decimal_places=9, blank=True, null=True, help_text="""The normal 
-                amount of time one boils for this equipment setup. This can be 
-                used with the evaporation rate to calculate the evaporation loss.""")
+            decimal_places=9, blank=True, null=True, help_text="""The normal amount of 
+            time one boils for this equipment setup. This can be used with the 
+            evaporation rate to calculate the evaporation loss.""")
     calc_boil_volume = models.BooleanField(_("calculate boil volume"), default=False, 
-                help_text="""Flag denoting that the program should calculate the boil 
-                size. Flag may be TRUE or FALSE. If TRUE, then 
-                BOIL_SIZE = (BATCH_SIZE – TOP_UP_WATER – TRUB_CHILLER_LOSS) 
-                              * (1 + BOIL_TIME * EVAP_RATE ) 
-                If set then the boil size should match this value.""")
+            help_text="""Flag denoting that the program should calculate the boil size. 
+            Flag may be True or False. If set then the boil size should match this value.""")
     lauter_deadspace = models.DecimalField(_("lauter deadspace (litres)"), max_digits=14, 
-                decimal_places=9, blank=True, null=True, help_text="""Amount lost to 
-                the lauter tun and equipment associated with the lautering process.""")
+            decimal_places=9, blank=True, null=True, help_text="""Amount lost to 
+            the lauter tun and equipment associated with the lautering process.""")
     top_up_kettle = models.DecimalField(_("kettle top-up water (litres)"), max_digits=14, 
-                decimal_places=9, blank=True, null=True, 
-                help_text="Amount normally added to the boil kettle before the boil.")
+            decimal_places=9, blank=True, null=True, help_text="""Amount normally added 
+            to the boil kettle before the boil.""")
     hop_utilization = models.DecimalField(_("hop utilization %"), max_digits=14, 
-                decimal_places=9, blank=True, null=True, help_text="""Large batch 
-                hop utilization. This value should be 100% for batches less than 20 gallons, 
-                but may be higher (200% or more) for very large batch equipment.""")
+            decimal_places=9, blank=True, null=True, help_text="""Large batch hop 
+            utilization. This value should be 100% for batches less than 20 gallons, 
+            but may be higher (200% or more) for very large batch equipment.""")
     notes = models.TextField(_("notes"), blank=True, null=True)
     
     # Optional extension for BeerXML display
