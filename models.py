@@ -66,20 +66,6 @@ from django.dispatch.dispatcher import receiver
 from django.template.defaultfilters import slugify
 
 
-#
-# Signals
-#
-
-@receiver(signals.pre_save)
-def clean_model_callback(sender, instance, **kwargs):
-    """
-    Brewery models depend on model cleaning to
-    translate some BeerXML values to brewery compatible
-    values. This callback will call clean on every
-    model before saving.
-    """
-    instance.clean()
-
 
 #
 # Models
@@ -205,7 +191,7 @@ class Equipment(BeerXMLBase):
                 * (1 + self.boil_time * self.evap_rate)
                 
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
         if self.calc_boil_volume is True:
             self.boil_size = self.boil_volume
@@ -302,7 +288,7 @@ class Fermentable(BeerXMLBase):
         return u"%s" % self.name
 
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
         if self.ferm_type:
             self.ferm_type = u"%s" % self.ferm_type.lower()
@@ -392,7 +378,7 @@ class Hop(BeerXMLBase):
         return u"%s" % self.name
 
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
         if self.use:
             self.use = u"%s" % self.use.lower()
@@ -471,7 +457,7 @@ class MashStep(BeerXMLBase):
         return u"%s" % self.name
 
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
         if self.mash_type:
             self.mash_type = u"%s" % self.mash_type.lower()
@@ -529,7 +515,7 @@ class MashProfile(BeerXMLBase):
         return u"%s" % self.name
     
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
 
 
@@ -593,7 +579,7 @@ class Misc(BeerXMLBase):
         return u"%s" % self.name
     
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
         if self.misc_type:
             self.misc_type = u"%s" % self.misc_type.lower()
@@ -697,7 +683,7 @@ class Yeast(BeerXMLBase):
         return u"%s" % self.name
 
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
         if self.yiest_type:
             self.yiest_type = u"%s" % self.yiest_type.lower()
@@ -740,7 +726,7 @@ class Water(BeerXMLBase):
         return u"%s" % self.name
     
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
     
     
@@ -858,7 +844,7 @@ class Style(BeerXMLBase):
         return u"%s" % self.name
 
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
         if self.style_type:
             self.style_type = u"%s" % self.style_type.lower()
@@ -1044,7 +1030,7 @@ class Recipe(BeerXMLBase):
         return u"%s" % self.name
 
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify(self.name)
         if self.recipe_type:
             self.recipe_type = u"%s" % self.recipe_type.lower()
@@ -1127,5 +1113,60 @@ class RecipeOption(models.Model):
         return u"%s Recipe options" % self.recipe.name
     
     def clean(self):
-        if self.slug is None:
+        if not self.slug:
             self.slug = slugify("%s-recipe-options" % self.recipe)
+
+
+#
+# Signals
+#
+# Brewery models depend on model cleaning to
+# translate some BeerXML values to brewery compatible
+# values. We need to hook onto the pre_save signal on
+# each model to achieve that.
+# NOTE: This is not very DRY, can it be done better?
+
+@receiver(signals.pre_save, sender=Equipment)
+def clean_equipment_callback(sender, instance, **kwargs):
+    instance.clean()
+
+@receiver(signals.pre_save, sender=Fermentable)
+def clean_fermentable_callback(sender, instance, **kwargs):
+    instance.clean()
+    
+@receiver(signals.pre_save, sender=Hop)
+def clean_hop_callback(sender, instance, **kwargs):
+    instance.clean()
+    
+@receiver(signals.pre_save, sender=MashStep)
+def clean_mash_step_callback(sender, instance, **kwargs):
+    instance.clean()
+    
+@receiver(signals.pre_save, sender=MashProfile)
+def clean_mash_profile_callback(sender, instance, **kwargs):
+    instance.clean()
+    
+@receiver(signals.pre_save, sender=Misc)
+def clean_misc_callback(sender, instance, **kwargs):
+    instance.clean()
+    
+@receiver(signals.pre_save, sender=Yeast)
+def clean_yeast_callback(sender, instance, **kwargs):
+    instance.clean()
+    
+@receiver(signals.pre_save, sender=Water)
+def clean_water_callback(sender, instance, **kwargs):
+    instance.clean()
+    
+@receiver(signals.pre_save, sender=Style)
+def clean_style_callback(sender, instance, **kwargs):
+    instance.clean()
+
+@receiver(signals.pre_save, sender=Recipe)
+def clean_recipe_callback(sender, instance, **kwargs):
+    instance.clean()
+    
+@receiver(signals.pre_save, sender=RecipeOption)
+def clean_recipe_option_callback(sender, instance, **kwargs):
+    instance.clean()
+    
