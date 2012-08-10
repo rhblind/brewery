@@ -63,6 +63,7 @@ from django.db.models import signals
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.dispatch.dispatcher import receiver
+from django.template.defaultfilters import slugify
 
 
 #
@@ -84,14 +85,33 @@ def clean_model_callback(sender, instance, **kwargs):
 # Models
 #
 
-class Equipment(models.Model):
+class BeerXMLBase(models.Model):
+    """
+    Base model which all other models inherit
+    from. This model has fields and methods which
+    are common for all models
+    """
+
+    class Meta:
+        abstract = True
+        
+    name = models.CharField(_("name"), max_length=100)
+    version = models.PositiveSmallIntegerField(_("version"), default=1,
+                                        editable=False, help_text="XML version")
+    slug = models.SlugField(max_length=100)
+    registered_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="%(app_label)s_%(class)s_registered_by_set", help_text="Registered by")
+    modified_by = models.ForeignKey(User, blank=True, null=True,
+            related_name="%(app_label)s_%(class)s_modified_by_set", help_text="Modified by")
+    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
+    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
+    
+            
+class Equipment(BeerXMLBase):
     """
     Database model for equipment
     """
 
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1,
-                               editable=False, help_text="XML version")
     boil_size = models.DecimalField(_("boil size"), max_digits=14, 
                 decimal_places=9, help_text="""The pre-boil volume used 
                 in this particular instance for this equipment setup.
@@ -183,15 +203,6 @@ class Equipment(models.Model):
             max_length=50, blank=True, null=True, help_text="""Amount normally 
             added to the boil kettle before the boil. Ex: “1.0 gal”""")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="equipment_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="equipment_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
     def __unicode__(self):
         return u"%s" % self.name
     
@@ -201,10 +212,12 @@ class Equipment(models.Model):
                 * (1 + self.boil_time * self.evap_rate)
                 
     def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
         if self.calc_boil_volume is True:
             self.boil_size = self.boil_volume
             
-class Fermentable(models.Model):
+class Fermentable(BeerXMLBase):
     """
     The term "fermentable" encompasses all fermentable items that contribute 
     substantially to the beer including extracts, grains, sugars, honey, fruits.
@@ -218,10 +231,6 @@ class Fermentable(models.Model):
         (u"adjunct", u"Adjunct")
     )
     
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                               editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     ferm_type = models.CharField(_("fermentable type"), max_length=12, choices=TYPE)
     amount = models.DecimalField(_("amount"), max_digits=14, decimal_places=9,
@@ -291,31 +300,23 @@ class Fermentable(models.Model):
             null=True, help_text="""Color in user defined color units along with the 
             unit identified – for example “200L” or “40 ebc""")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    is_mashed = models.NullBooleanField(_("is mashed"), default=False, blank=True, null=True)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="fermentable_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="fermentable_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
-    # NOTE: See beginning of file
     _beerxml_attrs = {
         "type": "ferm_type",
         "yield": "ferm_yield"
     }
     
-    def clean(self, *args, **kwargs):
+    def __unicode__(self):
+        return u"%s" % self.name
+
+    def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
         if self.ferm_type:
             self.ferm_type = u"%s" % self.ferm_type.lower()
         
-    def __unicode__(self):
-        return u"%s" % self.name
     
     
-class Hop(models.Model):
+class Hop(BeerXMLBase):
     """
     The “Hop” identifier is used to define all varieties of hops.
     """
@@ -339,10 +340,6 @@ class Hop(models.Model):
         (u"leaf", u"Leaf")
     )
     
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                               editable=False, help_text="XML version")
     alpha = models.DecimalField(_("alpha percentage"), max_digits=14, 
             decimal_places=9, help_text="""Percent alpha of hops 
             - for example "5.5" represents 5.5% alpha""")
@@ -394,21 +391,16 @@ class Hop(models.Model):
             help_text="""Time displayed in minutes for all uses except for the dry hop 
             which is in days. For example “60 min”, “3 days”.""")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="hop_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="hop_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
-    # NOTE: See beginning of file
     _beerxml_attrs = {
         "type": "hop_type"
     }
     
+    def __unicode__(self):
+        return u"%s" % self.name
+
     def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
         if self.use:
             self.use = u"%s" % self.use.lower()
         if self.hop_type:
@@ -416,11 +408,9 @@ class Hop(models.Model):
         if self.form:
             self.form = u"%s" % self.use.lower()
     
-    def __unicode__(self):
-        return u"%s" % self.name
 
 
-class MashStep(models.Model):
+class MashStep(BeerXMLBase):
     """
     Used within a Mash profile to record the steps
     """
@@ -430,10 +420,6 @@ class MashStep(models.Model):
         (u"decoction", u"Decoction")
     )
 
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                               editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     mash_type = models.CharField(_("type"), max_length=12, choices=TYPE, 
             help_text="""May be “Infusion”, “Temperature” or “Decoction” depending 
@@ -483,30 +469,23 @@ class MashStep(models.Model):
             blank=True, null=True, help_text="""Infusion amount along with the volume 
             units as in “20 l” or “13 qt”""")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="mashstep_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="mashstep_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-
-    # NOTE: See beginning of file
     _beerxml_attrs = {
         "type": "mash_type",
         "decoction_amount": "decoction_amt"
     }
 
-    def clean(self):
-        if self.mash_type:
-            self.mash_type = u"%s" % self.mash_type.lower()
-        
     def __unicode__(self):
         return u"%s" % self.name
 
+    def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
+        if self.mash_type:
+            self.mash_type = u"%s" % self.mash_type.lower()
+        
 
-class MashProfile(models.Model):
+
+class MashProfile(BeerXMLBase):
     """
     A mash profile is a record used either within a recipe or 
     outside the recipe to precisely specify the mash method used. 
@@ -514,10 +493,6 @@ class MashProfile(models.Model):
     <MASH_STEPS> record that contains the actual mash steps.
     """
     
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100, blank=True, null=True)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                       editable=False, help_text="XML version")
     grain_temp = models.DecimalField(_("grain temperature"), max_digits=14, 
             decimal_places=9, help_text="""The temperature of the grain before 
             adding it to the mash in degrees Celsius.""")
@@ -557,20 +532,15 @@ class MashProfile(models.Model):
             blank=True, null=True, help_text="""Tun weight in user defined units 
             – for example “10 lb”""")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="mashprofile_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="mashprofile_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
     def __unicode__(self):
         return u"%s" % self.name
+    
+    def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
 
 
-class Misc(models.Model):
+class Misc(BeerXMLBase):
     """
     Database model for various items
     """
@@ -592,10 +562,6 @@ class Misc(models.Model):
        (u"bottling", u"Bottling")
     )
     
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                   editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     misc_type = models.CharField(_("hop type"), max_length=12, choices=TYPE, default=4)
     use = models.CharField(_("hop type"), max_length=12, choices=USE, default=2)
@@ -626,31 +592,24 @@ class Misc(models.Model):
             null=True, help_text="""Time in appropriate units along with the units 
             as in “10 min” or “3 days”.""")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="misc_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="misc_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
-    # NOTE: See beginning of file
     _beerxml_attrs = {
         "type": "misc_type"
     }
     
+    def __unicode__(self):
+        return u"%s" % self.name
+    
     def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
         if self.misc_type:
             self.misc_type = u"%s" % self.misc_type.lower()
         if self.use:
             self.use = u"%s" % self.use.lower()
     
-    def __unicode__(self):
-        return u"%s" % self.name
     
     
-class Yeast(models.Model):
+class Yeast(BeerXMLBase):
     """
     Database model for yeast
     """
@@ -677,10 +636,6 @@ class Yeast(models.Model):
         (u"very high", u"Very high")
     )
     
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                       editable=False, help_text="XML version")
     # NOTE: type is a reserved python word.
     yiest_type = models.CharField(_("yeast type"), max_length=12, choices=TYPE, 
                                   default=1)
@@ -741,21 +696,16 @@ class Yeast(models.Model):
     culture_date = models.CharField(_("inventory"), max_length=50, blank=True, null=True,
             help_text="Date sample was last cultured in a neutral date form such as “10 Dec 04”")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="yeast_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="yeast_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
-    # NOTE: See beginning of file
     _beerxml_attrs = {
         "type": "yiest_type"
     }
     
+    def __unicode__(self):
+        return u"%s" % self.name
+
     def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
         if self.yiest_type:
             self.yiest_type = u"%s" % self.yiest_type.lower()
         if self.form:
@@ -763,18 +713,12 @@ class Yeast(models.Model):
         if self.flocculation:
             self.flocculation = u"%s" % self.flocculation.lower()
     
-    def __unicode__(self):
-        return u"%s" % self.name
     
     
-class Water(models.Model):
+class Water(BeerXMLBase):
     """
     Waters
     """
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                       editable=False, help_text="XML version")
     amount = models.DecimalField(_("amount"), max_digits=14, decimal_places=9,
             help_text="Volume of water to use in a recipe in liters.")
     calcium = models.DecimalField(_("calcium"), max_digits=14, decimal_places=9,
@@ -799,20 +743,15 @@ class Water(models.Model):
             record along with the units formatted for easy display in the 
             current user defined units. For example “5.0 gal” or “20.0 l”.""")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="water_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="water_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
     def __unicode__(self):
         return u"%s" % self.name
     
+    def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
     
-class Style(models.Model):
+    
+class Style(BeerXMLBase):
     """
     Database model for brewing styles
     """
@@ -826,10 +765,6 @@ class Style(models.Model):
         (u"cider", u"Cider")
     )
     
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                   editable=False, help_text="XML version")
     category = models.CharField(_("category"), max_length=100, 
             help_text="""Category that this style belongs to – usually 
             associated with a group of styles such as  “English Ales” or 
@@ -922,29 +857,22 @@ class Style(models.Model):
     abv_range = models.CharField(_("ABV range"), max_length=50, blank=True, null=True,
             help_text="ABV Range for this style such as “4.5-5.5%”")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="style_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="style_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
-    # NOTE: See beginning of file
     _beerxml_attrs = {
         "type": "style_type"
     }
     
+    def __unicode__(self):
+        return u"%s" % self.name
+
     def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
         if self.style_type:
             self.style_type = u"%s" % self.style_type.lower()
     
-    def __unicode__(self):
-        return u"%s" % self.name
     
     
-class Recipe(models.Model):
+class Recipe(BeerXMLBase):
     """
     Database model for reciepes
     """
@@ -960,10 +888,6 @@ class Recipe(models.Model):
         (u"garetz", u"Garetz")
     )
     
-    # BeerXML fields
-    name = models.CharField(_("name"), max_length=100)
-    version = models.PositiveSmallIntegerField(_("version"), default=1, 
-                                   editable=False, help_text="XML version")
     recipe_type = models.CharField(_("type"), max_length=12, choices=TYPE)
     style = models.ForeignKey(Style, null=True, help_text="""The style of the 
             beer this recipe is associated with.""")
@@ -1119,28 +1043,21 @@ class Recipe(models.Model):
             max_length=50, blank=True, null=True, help_text="""Carbonation/Bottling 
             temperature in appropriate units such as “40F” or “32C”""")
     
-    # Other nice to have fields
-    slug = models.SlugField(max_length=100)
-    registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="recipe_registered_by", help_text="Registered by")
-    modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="recipe_modified_by", help_text="Modified by")
-    cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
-    mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
-    
-    # NOTE: See beginning of file
     _beerxml_attrs = {
         "type": "recipe_type"
     }
     
+    def __unicode__(self):
+        return u"%s" % self.name
+
     def clean(self):
+        if self.slug is None:
+            self.slug = slugify(self.name)
         if self.recipe_type:
             self.recipe_type = u"%s" % self.recipe_type.lower()
         if self.ibu_method:
             self.ibu_method = u"%s" % self.ibu_method.lower()
     
-    def __unicode__(self):
-        return u"%s" % self.name
     
 
 class RecipeOption(models.Model):
@@ -1205,13 +1122,17 @@ class RecipeOption(models.Model):
             for calculating the color for this recipe""")
     ibu_formula = models.PositiveSmallIntegerField(_("ibu formula"), choices=IBU_FORMULA, 
             default=0, help_text="IBU formula to use for calculating IBU for this recipe")
+    slug = models.SlugField(max_length=100)
     registered_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="recipeoption_registered_by", help_text="Registered by")
+            related_name="%(app_label)s_%(class)s_registered_by_set", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
-            related_name="recipeoption_modified_by", help_text="Modified by")
+            related_name="%(app_label)s_%(class)s_modified_by_set", help_text="Modified by")
     cdt = models.DateTimeField(_("created"), editable=False, auto_now_add=True)
     mdt = models.DateTimeField(_("modified"), editable=False, auto_now=True)
     
     def __unicode__(self):
         return u"%s Recipe options" % self.recipe.name
-
+    
+    def clean(self):
+        if self.slug is None:
+            self.slug = slugify("%s-recipe-options" % self.recipe)
