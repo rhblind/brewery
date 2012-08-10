@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from error import BeerXMLError, BeerXMLValidationError
+from brewery.beerxml.error import BeerXMLError, BeerXMLValidationError
 
 from django.utils.encoding import smart_str
 from django.db.models.base import Model
