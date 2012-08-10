@@ -84,7 +84,7 @@ class BeerXMLBase(models.Model):
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1,
                                         editable=False, help_text="XML version")
-    slug = models.SlugField(max_length=100)
+    slug = models.SlugField(max_length=100, blank=True)
     registered_by = models.ForeignKey(User, blank=True, null=True,
             related_name="%(app_label)s_%(class)s_registered_by_set", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
