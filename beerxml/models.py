@@ -37,8 +37,6 @@ class BeerXMLNode(dict):
         If model has some naming conventions which differs from
         XML element tags, these should be listed in the _beerxml_attrs
         dictionary attribute of the model.
-        This method compare the element to the model attributes and
-        sets the name which should be used.
         """
         
         super(BeerXMLNode, self).__init__()
@@ -157,7 +155,6 @@ class BeerXMLNode(dict):
             
             inherit = kwargs.pop("inherit", {})
             try:
-                # TODO: use get_or_create()
                 # Add many-to-one (ForeignKey) relations
                 for m2one in node.many_to_one:
                     for field_name, n in m2one.iteritems():
