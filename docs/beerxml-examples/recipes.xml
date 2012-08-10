@@ -329,7 +329,7 @@
    </WATER>
   </WATERS>
   <MASH>
-   <NAME></NAME>
+   <NAME>Mash name here!</NAME>
    <VERSION>1</VERSION>
    <GRAIN_TEMP>0.00000e+00</GRAIN_TEMP>
    <MASH_STEPS/>
@@ -1844,7 +1844,7 @@
   </YEASTS>
   <WATERS/>
   <MASH>
-   <NAME></NAME>
+   <NAME>Mash name here!</NAME>
    <VERSION>1</VERSION>
    <GRAIN_TEMP>2.10000e+01</GRAIN_TEMP>
    <MASH_STEPS/>
