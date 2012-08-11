@@ -1081,7 +1081,8 @@ class RecipeOption(models.Model):
     
     IBU_FORMULA = (
         (0, u"Tinseth's approximation"),
-        (1, u"Rager's approximation")
+        (1, u"Rager's approximation"),
+        (2, u"Garetz' approximation")
     )
     
     recipe = models.OneToOneField(Recipe)
