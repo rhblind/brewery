@@ -11,23 +11,21 @@ class Tinseth:
     All formula's from http://www.realbeer.com/hops/research.html
     """
     
-    def ibu(self, alpha_acid_utilization):
+    def ibu(self, alpha_acid_utilization, mg_alpha_acids):
         """
         IBUs = decimal alpha acid utilization * mg/l of added alpha acids
         """
-        pass
+        return  alpha_acid_utilization * mg_alpha_acids
     
-    def mg_alpha_acids(self, alpha_acid_rating, grams_of_hop):
+    def mg_alpha_acids(self, alpha_acid_rating, grams_of_hop, batch_size):
         """
         Calculate the concentration of alpha acids you add to the wort.
         
         mg per litre of added alpha acids = decimal AA rating * grams hops * 1000
-                                    -------------------------------------
-                                      volume of finished beer in liters
-                                      
-        
+                                            -------------------------------------
+                                              volume of finished beer in liters
         """
-        pass
+        return alpha_acid_rating * grams_of_hop * 1000 / batch_size
     
     def alpha_acid_utilization(self, bigness_factor, boil_time_factor):
         """
@@ -44,9 +42,9 @@ class Tinseth:
         
         Bigness factor = 1.65 * 0.000125^(wort gravity - 1)
         """
-        return 1.65*0.000125**(float(wort_gravity) - 1.0)
+        return 1.65 * 0.000125 ** (float(wort_gravity) -1.0)
     
-    def boil_time_factor(self):
+    def boil_time_factor(self, time_in_mins):
         """
         The Boil Time factor accounts for the change in utilization due to boil time:
         
@@ -54,7 +52,9 @@ class Tinseth:
                            --------------------------
                                        4.15
         """
-        pass
+        e = 2.71828182846
+        return 1 - e ** (-0.04 * float(time_in_mins)) / 4.15
+
 
 class Rager:
     pass
