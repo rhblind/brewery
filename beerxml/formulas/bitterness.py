@@ -17,13 +17,15 @@ class Tinseth:
         """
         pass
     
-    def mg1_alpha_acids(self, alpha_acid_rating, grams_of_hop):
+    def mg_alpha_acids(self, alpha_acid_rating, grams_of_hop):
         """
         Calculate the concentration of alpha acids you add to the wort.
         
-        mg/l of added alpha acids = decimal AA rating * grams hops * 1000
+        mg per litre of added alpha acids = decimal AA rating * grams hops * 1000
                                     -------------------------------------
                                       volume of finished beer in liters
+                                      
+        
         """
         pass
     
@@ -32,9 +34,9 @@ class Tinseth:
         Calculate alpha acid utilization.
         decimal alpha acid utilization = Bigness factor * Boil Time factor
         """ 
-        pass
+        return bigness_factor * boil_time_factor
     
-    def bigness_factor(self):
+    def bigness_factor(self, wort_gravity):
         """
         The Bigness factor accounts for reduced utilization due to 
         higher wort gravities. Use an average gravity value for the 
@@ -42,16 +44,17 @@ class Tinseth:
         
         Bigness factor = 1.65 * 0.000125^(wort gravity - 1)
         """
-        pass
+        return 1.65*0.000125**(float(wort_gravity) - 1.0)
     
     def boil_time_factor(self):
         """
+        The Boil Time factor accounts for the change in utilization due to boil time:
+        
         Boil Time factor = 1 - e^(-0.04 * time in mins)
                            --------------------------
                                        4.15
         """
         pass
-    
 
 class Rager:
     pass
