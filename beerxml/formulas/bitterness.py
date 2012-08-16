@@ -4,11 +4,14 @@
 # bitterness by the three most popular ibu equations,
 # Tinseth, Rager and Garetz
 #
+# Resources:
+# http://www.realbeer.com/hops/
+# https://docs.google.com/viewer?url=http://www.nthba.org/www/docs/Brew%2520Day%2520Presentation%2520-%2520Hop%2520Bittering.ppt&pli=1
+#
 
 class Tinseth:
     """
-    Calculate bitterness by Tinseth's approximation
-    All formula's from http://www.realbeer.com/hops/research.html
+    Estimating IBUs Tinseth Formula
     """
     
     def ibu(self, alpha_acid_utilization, mg_alpha_acids):
@@ -57,8 +60,38 @@ class Tinseth:
 
 
 class Rager:
+    """
+    Estimating IBUs Rager Formula
+    
+    IBU = %U * Woz * %A * 7462
+          --------------------
+            Vgal * (1 + GA)
+            
+    Where:
+        GA = (GB – 1.050)/.2
+    
+    GB = Gravity of boiling wort at end of boil
+    GA = Gravity adjustment
+    Woz = Hop weight in ounces
+    Vgal = Volume of beer fermented in gallons
+    %U = Boil utilization percent
+    %A = Hop alpha acid percent
+    """
     pass
 
-
 class Garetz:
+    """
+    Estimating IBUs Garetz Formula
+    
+    IBU =    %U * Woz * %A * 7490
+          --------------------------
+           Vgal * (1 + GA) * TF * HF
+    
+    Where:
+        GA = (GB – 1.050)/.2
+        
+    TF = ((Elevation in feet/550)*0.02) + 1
+    CF = (Ferment Vol)/(Boil Vol)
+    HF = (CF*IBU/260) + 1
+    """
     pass
