@@ -757,7 +757,7 @@ class Style(BeerXMLBase):
             with this particular style. For example in the BJCP style guide, an 
             American Standard Lager would be style letter “A” under the main category. 
             Letters should be upper case.""")
-    style_guide = models.CharField(_("style_guide"), max_length=10, 
+    style_guide = models.CharField(_("style guide"), max_length=10, 
             help_text="""The name of the style guide that this particular style or 
             category belongs to. For example “BJCP” might denote the BJCP style guide, 
             and “AHA” would be used for the AHA style guide.""")
@@ -1102,7 +1102,7 @@ class RecipeOption(models.Model):
             for calculating the color for this recipe""")
     ibu_formula = models.PositiveSmallIntegerField(_("ibu formula"), choices=IBU_FORMULA, 
             default=0, help_text="IBU formula to use for calculating IBU for this recipe")
-    slug = models.SlugField(max_length=100)
+    slug = models.SlugField(max_length=100, blank=True)
     registered_by = models.ForeignKey(User, blank=True, null=True,
             related_name="%(app_label)s_%(class)s_registered_by_set", help_text="Registered by")
     modified_by = models.ForeignKey(User, blank=True, null=True,
