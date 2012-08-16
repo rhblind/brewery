@@ -8,6 +8,7 @@ from django.db.models.loading import get_model
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToOneRel, ManyToManyRel
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 # Mapping of BeerXML standard node tags to brewery models
 NODENAMES = {
@@ -162,6 +163,7 @@ class BeerXMLNode(dict):
                         lookup.update(inherit)
                         rel_obj, created = n._model.objects.get_or_create(**lookup)
                         setattr(obj, field_name, rel_obj)
+                        obj.save()
                         save_node_relations(n, rel_obj)
                 
                 # Add many-to-many relations
