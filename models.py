@@ -868,6 +868,9 @@ class Recipe(BeerXMLBase):
     )
     
     recipe_type = models.CharField(_("type"), max_length=12, choices=TYPE)
+    # NOTE: Even thoguh Style is a required beerxml field, we set this as
+    # null=True, to solve a recursive dependency problem in the 
+    # BeerXMLNode.get_or_create() method.
     style = models.ForeignKey(Style, null=True, help_text="""The style of the 
             beer this recipe is associated with.""")
     equipment = models.ForeignKey(Equipment, blank=True, null=True, 
