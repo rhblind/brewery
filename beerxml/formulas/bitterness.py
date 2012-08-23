@@ -13,7 +13,6 @@ class Tinseth:
     """
     Estimating IBUs Tinseth Formula
     """
-    
     def ibu(self, alpha_acid_utilization, mg_alpha_acids):
         """
         IBUs = decimal alpha acid utilization * mg/l of added alpha acids

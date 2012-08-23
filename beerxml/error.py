@@ -8,6 +8,5 @@ class BeerXMLError(Exception):
     """
     pass
 
-
 class BeerXMLValidationError(BeerXMLError):
     pass
