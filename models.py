@@ -80,6 +80,7 @@ class BeerXMLBase(models.Model):
 
     class Meta:
         abstract = True
+        app_label = "brewery"
         
     name = models.CharField(_("name"), max_length=100)
     version = models.PositiveSmallIntegerField(_("version"), default=1,
@@ -195,6 +196,7 @@ class Equipment(BeerXMLBase):
             self.slug = slugify(self.name)
         if self.calc_boil_volume is True:
             self.boil_size = self.boil_volume
+      
             
 class Fermentable(BeerXMLBase):
     """
@@ -292,7 +294,6 @@ class Fermentable(BeerXMLBase):
             self.slug = slugify(self.name)
         if self.ferm_type:
             self.ferm_type = u"%s" % self.ferm_type.lower()
-        
     
     
 class Hop(BeerXMLBase):
@@ -388,7 +389,6 @@ class Hop(BeerXMLBase):
             self.form = u"%s" % self.use.lower()
     
 
-
 class MashStep(BeerXMLBase):
     """
     Used within a Mash profile to record the steps
@@ -462,7 +462,6 @@ class MashStep(BeerXMLBase):
         if self.mash_type:
             self.mash_type = u"%s" % self.mash_type.lower()
         
-
 
 class MashProfile(BeerXMLBase):
     """
@@ -587,7 +586,6 @@ class Misc(BeerXMLBase):
             self.use = u"%s" % self.use.lower()
     
     
-    
 class Yeast(BeerXMLBase):
     """
     Database model for yeast
@@ -691,7 +689,6 @@ class Yeast(BeerXMLBase):
             self.form = u"%s" % self.form.lower()
         if self.flocculation:
             self.flocculation = u"%s" % self.flocculation.lower()
-    
     
     
 class Water(BeerXMLBase):
@@ -848,7 +845,6 @@ class Style(BeerXMLBase):
             self.slug = slugify(self.name)
         if self.style_type:
             self.style_type = u"%s" % self.style_type.lower()
-    
     
     
 class Recipe(BeerXMLBase):
@@ -1047,6 +1043,9 @@ class RecipeOption(models.Model):
     Each recipe can have a different set of options.
     """
     
+    class Meta:
+        app_label = "brewery"
+        
     # Units
     WEIGHT = (
         (0, u"Use SI units"),
