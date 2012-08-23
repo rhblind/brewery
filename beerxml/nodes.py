@@ -98,10 +98,13 @@ class BeerXMLNode(dict):
         """
         Return the corresponding model for node
         """
-        model = get_model("brewery", NODENAMES[self.__name__]) or None
-        if model is None:
-            raise BeerXMLValidationError("Could not find model: %s" % self.__name__) 
-        return model
+        try:
+            model = get_model("brewery", NODENAMES[self.__name__]) or None
+            if model is None:
+                raise BeerXMLValidationError("Could not find model: %s" % self.__name__) 
+            return model
+        except KeyError, e:
+            raise BeerXMLValidationError("%s is not a valid BeerXML tag" % e.args[0])
     _model = property(_get_node_model)
     
     def iter_field_type(self, field_type):
@@ -191,3 +194,4 @@ class BeerXMLNode(dict):
             raise BeerXMLError(e)
         
         return obj, created
+    
