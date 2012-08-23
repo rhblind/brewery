@@ -1,6 +1,6 @@
 from lxml import etree
 from brewery.beerxml.error import BeerXMLError
-from brewery.beerxml.models import BeerXMLNode
+from brewery.beerxml.nodes import BeerXMLNode
 
 try:
     from cStringIO import StringIO

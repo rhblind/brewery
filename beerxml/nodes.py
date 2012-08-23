@@ -8,7 +8,6 @@ from django.db.models.loading import get_model
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.fields.related import ManyToOneRel, ManyToManyRel
 from django.core.exceptions import ValidationError
-from django.db import transaction
 
 # Mapping of BeerXML standard node tags to brewery models
 NODENAMES = {
@@ -28,8 +27,8 @@ class BeerXMLNode(dict):
     """
     This class is used to map an xml node
     to a brewery model.
-    
     """
+
     def __init__(self, name, attrs):
         """
         Convert values to correct python data type,

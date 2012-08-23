@@ -7,7 +7,7 @@ import os
 from django.test import TestCase
 
 from brewery.beerxml import parser
-from brewery.beerxml.models import BeerXMLNode
+from brewery.beerxml.nodes import BeerXMLNode
 from django.db.models.base import Model
 
 EXAMPLES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 
