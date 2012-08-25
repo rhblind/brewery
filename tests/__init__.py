@@ -10,8 +10,6 @@ FILES = ("equipment.xml", "grain.xml", "hops.xml", "mash.xml",
 
 __all__ = ("EXAMPLES_DIR", "FILES")
 
-print EXAMPLES_DIR
-
 from brewery.tests.parser import *
 from brewery.tests.nodes import *
 from brewery.tests.formulas import *
