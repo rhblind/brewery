@@ -98,6 +98,38 @@ class Garetz:
     """
     Estimate IBUs using Garetz' equations.
     """
+    class range_dict(dict):
+        """
+        Wierd dict to support xrange keys
+        """
+        def __getitem__(self, key):
+            for k, v in self.iteritems():
+                if key in k:
+                    return v
+            raise KeyError(key)
+        
+        def get(self, key):
+            try:
+                return self.__getitem__(key)
+            except KeyError:
+                return None
+    
+    # I know.. it's silly =)
+    utilization_table = range_dict({
+        xrange(0, 10)   : 0,
+        xrange(11, 15)  : 2,
+        xrange(16, 20)  : 5,
+        xrange(21, 25)  : 8,
+        xrange(26, 30)  : 11,
+        xrange(32, 35)  : 14,
+        xrange(36, 40)  : 16,
+        xrange(41, 45)  : 18,
+        xrange(46, 50)  : 19,
+        xrange(51, 60)  : 20,
+        xrange(61, 70)  : 21,
+        xrange(71, 80)  : 22,
+        xrange(81, 90)  : 23,
+    })
     
     def ibu(self, grams_of_hop, utilization_percentage, alpha_acid_percentage, 
             batch_size_liters, combined_adjustments):
@@ -153,5 +185,12 @@ class Garetz:
         Calculate temperature factor
         """
         return ((elevation_in_feet / 550) * 0.02) + 1
+    
+    def utilization_percentage(self, time_in_minutes):
+        """
+        Get the average utilization percentage based on
+        boil time.
+        """ 
+        return self.utilization_table[time_in_minutes]
     
     
