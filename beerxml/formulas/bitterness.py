@@ -6,8 +6,6 @@
 #
 # Resources:
 # http://www.realbeer.com/hops/
-# http://www.realbeer.com/hops/FAQ.html
-# https://docs.google.com/viewer?url=http://www.nthba.org/www/docs/Brew%2520Day%2520Presentation%2520-%2520Hop%2520Bittering.ppt&pli=1
 
 import math
 
@@ -192,5 +190,6 @@ class Garetz:
         boil time.
         """ 
         return self.utilization_table[time_in_minutes]
+    
     
     
