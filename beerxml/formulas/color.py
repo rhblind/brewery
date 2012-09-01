@@ -37,7 +37,6 @@ def srm_to_ebc(srm):
     """
     return 1.97 * srm
      
-
 def mosher(mcu):
     """
     Return Standard Reference Method (SRM) using Mosher's 
