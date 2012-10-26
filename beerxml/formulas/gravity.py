@@ -3,6 +3,7 @@
 # References:
 # http://hbd.org/ensmingr/
 # http://en.wikipedia.org/wiki/Brix
+# http://realbeer.com/spencer/attenuation.html
 # http://en.wikipedia.org/wiki/Gravity_(alcoholic_beverage)
 # http://morebeer.com/brewingtechniques/library/backissues/issue2.1/manning.html
 
@@ -20,15 +21,16 @@ def gravity_to_plato(gravity):
 
 def gravity_to_brix(gravity):
     """
-    Degrees Brix (symbol °Bx) is the sugar content of an aqueous solution.
+    Convert gravity to degrees brix
     """
-    return (((182.4601 * gravity -775.6821) * gravity \
+    return (((182.4601 * gravity - 775.6821) * gravity \
              + 1262.7794) * gravity - 669.5622)
     
 def brix_to_gravity(brix):
     """
-    TODO: implement
+    Convert degrees brix to gravity
     """
+    # TODO: implement
     pass
 
 def specific_gravity(original_gravity, final_gravity):
@@ -56,14 +58,24 @@ def alcohol_by_weight(alcohol_by_volume, final_gravity=None):
         return (0.79 * alcohol_by_volume) / final_gravity
     return (0.78 * alcohol_by_volume)
     
-def true_extract():
-    pass
+def true_extract(original_gravity, final_gravity):
+    """
+    
+    """
+    return 0.1808 * original_gravity + 0.8192 * final_gravity
 
 def alcohol_content():
     pass
 
-def attenuation():
+def apparent_attenuation():
     pass
+
+def true_attenuation(original_gravity, final_gravity):
+    """
+
+    """
+    return 1 - true_extract(original_gravity, final_gravity) \
+         / original_gravity
 
 def brewers_point():
     pass
